@@ -1,0 +1,101 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root{
+    --primary:#FF902B;
+    --secondary: #DFD3C3;
+    --ternary:#2F2105;
+    --light:#5a5959;
+    --white:#FFFFFF;
+    --text:'Baloo Bhaijaan 2', sans-serif;
+}
+.baloo{
+    font-family: 'Baloo Bhaijaan 2', sans-serif;
+}
+.poppin{
+    font-family: "Poppins", sans-serif;
+
+}
+/* starting card section  */
+.wrapper{
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 100px;
+    justify-content:space-around;
+    margin: auto;
+    width: 85vw;
+    border-radius: 0px 32px 32px 0px;
+    margin-top: 30px;
+}
+.wrapper .card{
+ display: flex;
+ flex-direction: column;
+ justify-content: center;
+ align-items: center;
+ gap: 10px;
+ background-color: var(--white);
+ border-radius: 10px;
+ width: 17vw;
+ height: 300px;
+ box-shadow: 3px 3px 10px black;
+ padding: 10px;
+}
+.card img{
+    width: 16vw;
+    height: 200px;
+    /* margin-top:220px; */
+}
+.card .title{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 10px;
+}
+.card .title .title_name{
+    font-weight: 650;
+    font-size: 15px;
+}
+.card .title .price{
+    font-weight: 450;
+    font-size: 15px;
+}
+.shop .cart{
+    background-color: var(--primary);
+    padding: 2px;
+    border-radius: 200px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    cursor: pointer;
+}
+.shop{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.buy_btn{
+background-color: transparent;
+border: 1.5px solid var(--primary);
+padding: 7px 10px;
+border-radius: 20px;
+color: var(--primary);
+font-weight: 550;
+cursor: pointer;
+width: 100%;
+}
+a .buy_btn:hover{
+    border: none;
+    background-color: var(--primary);
+    color: white;
+}
+.error{
+font-size: 20px;
+text-align: center;
+}
+.search-title{
+margin-left: 8rem;
+}
