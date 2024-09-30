@@ -1,0 +1,361 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root{
+    --primary:#FF902B;
+    --secondary: #DFD3C3;
+    --ternary:#2F2105;
+    --light:#5a5959;
+    --white:#FFFFFF;
+    --text:'Baloo Bhaijaan 2', sans-serif;
+}
+.baloo{
+    font-family: 'Baloo Bhaijaan 2', sans-serif;
+}
+.poppin{
+    font-family: "Poppins", sans-serif;
+
+}
+/* starting of header section from here  */
+header{
+    background-color: var(--secondary);
+    height: 100vh;
+}
+
+/* main body of the project  */
+.header_main{
+    display: flex;
+    justify-content: center;
+    gap: 300px;
+    align-items: center;
+    width: 90vw;
+    height: 70vh;
+    margin: auto;
+    position: relative;
+    z-index: 1;
+}
+.header_main .left{
+    display: flex;
+    flex-direction: column;
+    gap:20px;
+    width: 30%;
+
+}
+.left .quote{
+    font-size: 48px;
+}
+.left .quote span{
+    color: var(--primary);
+}
+.left p{
+    font-weight: 500;
+    color: var(--light);
+    margin-bottom: 2rem;
+}
+.left a{
+    text-decoration: none;
+}
+.left .btn{
+    font-size: 24px;
+    padding: 5px 25px;
+    background-color: var(--ternary);
+    color: white;
+    border-radius: 50px;
+    box-shadow: 3px 3px 10px var(--primary);
+    border: none;
+    cursor: pointer;
+}
+.left .btn i{
+    font-size: 20px;
+    margin: 10px 20px;
+    margin-top: 10px;
+    margin-left: 20px;
+}
+
+.right{
+    display: flex;
+    justify-content: end;
+    width: 35%;
+}
+.right img{
+    width: 70%;
+
+}
+/* main section started from here  */
+main{
+    position: absolute;
+    bottom:-200px;
+    z-index: 1;
+}
+main .trend{
+font-size: 35px;    
+margin-left: 10rem;
+/* margin-top: -200px; */
+}
+main .trend span{
+  color: var(--primary);
+}
+/* starting card section  */
+.wrapper{
+    display: flex;
+    justify-content:space-evenly;
+    background-color: #cfc5b8;
+    width: 85vw;
+    border-radius: 0px 32px 32px 0px;
+    margin-top: 100px;
+    height:30vh ;
+}
+.wrapper .card{
+ display: flex;
+ flex-direction: column;
+ justify-content: center;
+ align-items: center;
+ gap: 10px;
+ background-color: var(--white);
+ border-radius: 10px;
+ margin-top: -70px;
+ width: 17vw;
+ margin-left: 5rem;
+ height: 300px;
+ box-shadow: 2px 2px 10px var(--secondary);
+}
+.card a{
+    width: 16.5vw;
+}
+.card img{
+    width: 100%;
+    height: 175px;
+    /* margin-top:220px; */
+}
+.card .title{
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+    margin-top: 10px;
+}
+.card .title .title_name{
+    font-weight: 650;
+    font-size: 15px;
+}
+.card .title .price{
+    font-weight: 450;
+    font-size: 15px;
+}
+.shop .cart{
+    background-color: var(--primary);
+    padding: 7px;
+    border-radius: 200px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    cursor: pointer;
+}
+.shop{
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+}
+.buy_btn{
+background-color: transparent;
+border: 1.5px solid var(--primary);
+padding: 7px 10px;
+border-radius: 20px;
+color: var(--primary);
+font-weight: 550;
+cursor: pointer;
+}
+a .buy_btn:hover{
+    border: none;
+    background-color: var(--primary);
+    color: white;
+}
+
+/* delivery section  */
+.delivery-section{
+    width: 85vw;
+    margin: auto;
+    padding: 60px 30px;
+    margin-top: 200px;
+}
+.delivery-section h1{
+    font-size: 30px;
+}
+.delivery-section .delivery{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 35vh;
+}
+.delivery-section .delivery .card{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    cursor: default;
+}
+.card h4{
+    font-size: 18px;
+}
+.card p{
+    font-size: 15px;
+    color: var(--light);
+}
+/* end of deliver section  */
+.about-us{
+    display: flex;
+    height: 60vh;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #D0B8A8;
+    padding: 10rem;
+}
+.about-us .img img{
+    width: 500px;
+}
+.about-us .about{
+    width: 500px;
+    display: grid;
+    gap: 20px;
+}
+.about-us .about h1{
+    font-size: 40px;
+}
+.about-us .about h4{
+    font-size: 24.5px;
+    font-weight: 500;
+}
+.about-us .about p{
+    color: var(--light);
+    letter-spacing: 2px;
+    text-align: justify;
+}
+.about-us .about a button{
+    background-color: var(--ternary);
+    border: none;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 15px;
+    border-radius: 30px;
+    color: white;
+}
+.about-us .about a button:hover{
+    color: var(--primary);
+}
+
+/* product section  */
+.about-product{
+    margin-top: 7rem;
+}
+.about-product .product-title{
+    font-size:40px;
+    margin-left: 10rem;
+    /* text-align: center; */
+}
+.about-product .product-title span{
+    color: var(--primary);
+}
+/* starting card section  */
+.product-wrapper{
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    justify-content:space-evenly;
+    gap: 50px;
+    /* background-color: #cfc5b8; */
+    width: 95vw;
+    margin: auto;
+    border-radius: 0px 32px 32px 0px;
+    padding: 20px;
+}
+.product-wrapper .product-card{
+ display: flex;
+ flex-direction: column;
+ justify-content: center;
+ align-items: center;
+ gap: 10px;
+ background-color: var(--white);
+ border-radius: 10px;
+ margin-top: 30px;
+ width: 17vw;
+ margin-left: 5rem;
+ height: 300px;
+ box-shadow: 0 2px 10px black;
+}
+.product-card a{
+    width: 16.5vw;
+}
+.product-card img{
+    width: 100%;
+    height: 190px;
+    border-radius: 10px;
+}
+.product-card .title{
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+    margin-top: 10px;
+}
+.product-card .title .title_name{
+    font-weight: 650;
+    font-size: 15px;
+}
+.product-card .title .price{
+    font-weight: 450;
+    font-size: 15px;
+}
+.shop .product-cart{
+    background-color: var(--primary);
+    padding: 7px;
+    border-radius: 100%;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    cursor: pointer;
+}
+.shop{
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+}
+.buy_btn{
+background-color: transparent;
+border: 1.5px solid var(--primary);
+padding: 7px 10px;
+border-radius: 20px;
+color: var(--primary);
+font-weight: 550;
+cursor: pointer;
+}
+a .buy_btn:hover{
+    border: none;
+    background-color: var(--primary);
+    color: white;
+}
+.more{
+    display: flex;
+    justify-content: center;
+    text-decoration: none;
+    margin-top: 40px;
+}
+.more_btn{
+padding: 7px 20px;
+border-radius: 5px;
+font-weight: 550;
+cursor: pointer;
+border: 1.5px solid white;
+background-color: var(--primary);
+color: white;
+font-size: 20px;
+letter-spacing: 2px;
+}
+.more_btn:hover{
+    background-color: transparent;
+border: 1.5px solid var(--primary);
+color: var(--primary);
+}

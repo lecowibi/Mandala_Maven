@@ -1,0 +1,135 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root{
+    --primary:#FF902B;
+    --secondary: #DFD3C3;
+    --ternary:#2F2105;
+    --light:#5a5959;
+    --white:#FFFFFF;
+    --text:'Baloo Bhaijaan 2', sans-serif;
+}
+.baloo{
+    font-family: 'Baloo Bhaijaan 2', sans-serif;
+}
+.poppin{
+    font-family: "Poppins", sans-serif;
+}
+.checkout-form{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+}
+form{
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 5px 5px 10px #1CD4BE;
+    border: 1px solid #1CD4BE;
+    border-radius: 20px;
+}
+form h1{
+    text-align: center;
+    font-size: 30px;
+}
+form .input{
+    width: 30vw;
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    flex-direction: column;
+}
+form .input span{
+    font-family:"Poppins", sans-serif;
+    font-size: 13px;
+}
+form .input input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0; 
+}
+form .input input{
+    width: 100%;
+    height: 30px;
+    outline: none;
+    padding: 5px 10px;
+    font-family:"Poppins", sans-serif;
+}
+.btn{
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.btn input{
+    padding: 5px 15px;
+    border: none;
+    border-radius: 20px;
+    font-family:"Poppins", sans-serif;
+    cursor: pointer;
+    font-size: 15px;
+}
+.btn #close{
+    background-color: #1CD4BE;
+    color: white;
+    border: 1px solid white;
+}
+.btn #close:hover{
+    color: #1CD4BE;
+    background-color: white;
+    border: 1px solid #1CD4BE;
+}
+.btn .order-btn{
+    color: #1CD4BE;
+    background-color: white;
+    border: 1px solid #1CD4BE;
+}
+.btn .order-btn:hover{
+    background-color: #1CD4BE;
+    color: white;
+    border: 1px solid white;
+}
+/* Display order styling */
+.display-order {
+    display: grid;
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #1CD4BE;
+    border-radius: 15px;
+    background-color: white;
+    margin-top: 20px;
+    width: 100%;
+}
+.display-order h1{
+    margin-bottom: 10px;
+    font-size: 25px;
+    color: #1CD4BE;
+}
+.display-order .order{
+display: flex;
+gap: 10px;
+}
+.display-order .order .name,.display-order .order .price {
+    font-family: var(--text);
+    font-size: 14px;
+    color: var(--ternary);
+    margin-bottom: 1px;
+    color: #1CD4BE;
+}
+.order .price{
+    font-weight: 500;
+}
+.total{
+    text-align: right;
+    margin-top: 20px;
+    color: #1CD4BE;
+}
+.total span{
+    font-weight: 450;
+}

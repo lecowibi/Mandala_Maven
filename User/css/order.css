@@ -1,0 +1,75 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+:root{
+    --primary:#FF902B;
+    --secondary: #DFD3C3;
+    --ternary:#2F2105;
+    --light:#5a5959;
+    --white:#FFFFFF;
+    --text:'Baloo Bhaijaan 2', sans-serif;
+}
+.baloo{
+    font-family: 'Baloo Bhaijaan 2', sans-serif;
+}
+.poppin{
+    font-family: "Poppins", sans-serif;
+
+}
+.display-product {
+    width: 90%;
+    margin: 20px auto; 
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+}
+
+/* Styling the Table */
+.display-product table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center; 
+    margin-top: 20px;
+}
+
+/* Table Head Styling */
+.display-product th {
+    background-color: #FF902B;
+    color: #fff;
+    padding: 12px 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-bottom: 2px solid #ddd; 
+}
+
+/* Table Body Styling */
+.display-product td {
+    padding: 15px;
+    color: #333;
+    border-bottom: 1px solid #ddd; 
+    vertical-align: middle;
+}
+.display-product .delete-btn{
+    padding: 6px 12px; 
+    margin: 5px;
+    color: white;
+    text-decoration: none; 
+    border-radius: 4px; 
+    display: inline-block; 
+    transition: background-color 0.3s; 
+    font-size: 14px; 
+}
+.display-product .delete-btn {
+    background-color: #e74c3c; /* Red background for delete button */
+}
+.display-product .delete-btn:hover {
+    background-color: #c0392b; /* Darker red on hover */
+}
+.empty{
+    text-align: center;
+    margin-top: 10px;
+    font-size: 20px;
+}

@@ -1,0 +1,257 @@
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Body Styling */
+body {
+    background-color: #f4f4f4;
+    color: #333;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* Container for the Form Section */
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Section */
+section {
+    padding: 20px;
+}
+
+/* Form Heading */
+h3 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Input Fields */
+input[type="text"],
+input[type="number"],
+input[type="file"],
+input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+/* Input Fields: Focus Effect */
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="file"]:focus {
+    border-color: #FF902B;
+    outline: none;
+}
+
+/* Submit Button */
+input[type="submit"] {
+    background-color: #FF902B;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* Submit Button Hover Effect */
+input[type="submit"]:hover {
+    background-color: #cf6c0e;
+}
+
+/* Feedback Messages */
+p {
+    background-color: orange;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+}
+h6{
+    background-color: #dff0d8;
+    color: #3c763d;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* Responsive Media Query */
+@media (max-width: 768px) {
+    .container {
+        width: 90%;
+        padding: 10px;
+    }
+
+    h3 {
+        font-size: 20px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    input[type="submit"] {
+        font-size: 14px;
+    }
+}
+
+
+
+
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    header .flex {
+        flex-direction: column; /* Stack items vertically on smaller screens */
+        align-items: flex-start; /* Align items to the start */
+    }
+
+    .navbar {
+        margin-top: 10px; /* Adds some space above the navbar */
+    }
+}
+/* Product Display Section */
+.display-product {
+    width: 90%; /* Width of the display section */
+    margin: 20px auto; /* Centering the section and adding space */
+    padding: 20px; /* Padding around the section */
+    background-color: #fff; /* White background for contrast */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Styling the Table */
+.display-product table {
+    width: 100%; /* Full width of the container */
+    border-collapse: collapse; /* Merges table borders */
+    text-align: center; /* Centers text in table cells */
+    margin-top: 20px; /* Adds space above the table */
+}
+
+/* Table Head Styling */
+.display-product th {
+    background-color: #FF902B; /* Blue background for header */
+    color: #fff; /* White text color */
+    padding: 12px 15px; /* Padding for table headers */
+    font-weight: bold; /* Bold text for headers */
+    text-transform: uppercase; /* Uppercase text */
+    border-bottom: 2px solid #ddd; /* Border below the headers */
+}
+
+/* Table Body Styling */
+.display-product td {
+    padding: 15px; /* Padding for table cells */
+    color: #333; /* Dark text color */
+    border-bottom: 1px solid #ddd; /* Light border below cells */
+    vertical-align: middle; /* Aligns content vertically in the middle */
+}
+
+/* Product Image Styling */
+.display-product img {
+    border-radius: 8px; /* Rounded corners for product images */
+    width: auto; /* Maintains image aspect ratio */
+}
+
+/* Action Buttons Styling */
+.display-product .delete-btn,
+.display-product .edit-btn {
+    padding: 6px 12px; 
+    margin: 5px;
+    color: #fff;
+    text-decoration: none; 
+    border-radius: 4px; 
+    display: inline-block; 
+    transition: background-color 0.3s; 
+    font-size: 14px; 
+}
+
+/* Delete Button Specific Styling */
+.display-product .delete-btn {
+    background-color: #e74c3c; /* Red background for delete button */
+}
+
+.display-product .delete-btn:hover {
+    background-color: #c0392b; /* Darker red on hover */
+}
+
+/* Edit Button Specific Styling */
+.display-product .edit-btn {
+    background-color: #f39c12; /* Orange background for edit button */
+}
+
+.display-product .edit-btn:hover {
+    background-color: #e67e22; /* Darker orange on hover */
+}
+
+/* No Product Message Styling */
+.display-product tbody td[colspan="4"] {
+    color: #999; /* Grey color for the message */
+    font-style: italic; /* Italicize text */
+    padding: 20px; /* Extra padding for the message */
+    text-align: center; /* Center the message */
+}
+.empty{
+    text-align: center;
+    margin-top: 10px;
+    font-size: 20px;
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    .display-product {
+        width: 100%; /* Full width for smaller screens */
+        padding: 15px; /* Reduced padding for smaller screens */
+    }
+
+    .display-product th, 
+    .display-product td {
+        padding: 10px; /* Reduced padding in cells */
+        font-size: 14px; /* Smaller font size */
+    }
+
+    .display-product .delete-btn, 
+    .display-product .edit-btn {
+        font-size: 12px; /* Smaller font size for buttons */
+    }
+}
+
+
+.edit_container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex; /* Hide by default */
+    justify-content: center;
+    align-items: center;
+    z-index: 1100;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.edit_container form {
+    background-color: white;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    border-radius: 10px;
+}

@@ -1,0 +1,281 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #FF902B;
+    --secondary: #DFD3C3;
+    --ternary: #2F2105;
+    --light: #5a5959;
+    --white: #FFFFFF;
+    --text: 'Baloo Bhaijaan 2', sans-serif;
+}
+
+.baloo {
+    font-family: 'Baloo Bhaijaan 2', sans-serif;
+}
+
+.poppin {
+    font-family: "Poppins", sans-serif;
+
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 3rem;
+    height: 8vh;
+    position: relative;
+
+}
+
+/* logo  */
+.logo img {
+    width: 50px;
+}
+
+/* main navbar */
+.active {
+    color: var(--primary);
+}
+
+.navigation ul a:hover {
+    color: var(--primary);
+    transition: .6s;
+}
+
+.navigation {
+    background-color: white;
+    width: 350px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0px 0px 50px 50px;
+    height: 60px;
+    position: absolute;
+    top: 0px;
+    left: 40%;
+}
+
+.navigation ul {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+    position: relative;
+}
+
+.navigation ul a {
+    text-decoration: none;
+    font-family: var(--text);
+    letter-spacing: 2px;
+    color: black;
+    font-size: 18px;
+    font-weight: 600;
+    position: relative;
+}
+
+.navigation ul a .design {
+    position: absolute;
+    top: 0;
+    left: -5px;
+    width: 110%;
+    height: 100%;
+    z-index: -1;
+    border-bottom: 2px solid var(--primary);
+    border-radius: 16px;
+    transform: scale(0) translateY(50px);
+    opacity: 0;
+    transition: .6s;
+}
+
+.navigation ul a:hover .design {
+    opacity: 1;
+    z-index: 2;
+    transform: scale(1) translateY(0);
+}
+
+/* extra nav bar start from here  */
+.extra_nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.search {
+    background-color: var(--white);
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 225px;
+    border-radius: 15px;
+    border: 1.5px solid grey;
+
+}
+
+.search input {
+    border: none;
+    outline: none;
+}
+
+.search .search_btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    width: 20px;
+    height: 25px;
+}
+
+/* dropdown user  */
+.dropdown ul {
+    display: none;
+    width: 100px;
+    margin-left: -30px;
+    list-style: none;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown ul li {
+    font-family: 'Baloo Bhaijaan 2', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    width: 100%;
+}
+
+.dropdown ul li a {
+    text-decoration: none;
+    color: black;
+    text-decoration: none;
+}
+
+.dropdown:hover ul {
+    display: block;
+    transition: all ease-out 500ms;
+    position: absolute;
+    top: 35px;
+}
+
+.dropdown ul:hover {
+    display: block;
+}
+
+.dropdown ul li a:hover {
+    border-bottom: 1.5px solid black;
+
+}
+
+/* cart  */
+.cart2 {
+    background-color: transparent;
+    border: none;
+    position: relative;
+}
+
+.dropdown2 ul {
+    background-color: white;
+    width: 25vw;
+    position: absolute;
+    top: 70px;
+    right: 40px;
+    border-radius: 20px;
+    height: auto;
+    transition: all ease-out 500ms;
+    padding: 10px 10px;
+    z-index: 400;
+    list-style: none;
+}
+
+.dropdown2 ul h3 {
+    margin-left: 10px;
+    font-size: 25px;
+    font-weight: 550;
+}
+
+.dropdown2 ul .cart {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: white;
+    box-shadow: 2px 0px 5px black;
+}
+
+.dropdown2 ul li h5 {
+    font-size: 10px;
+    width: 40%;
+}
+
+.dropdown2 ul li p {
+    font-size: 10px;
+    margin-left: 30px;
+    margin-right: 90px;
+}
+
+.btn-remove {
+    color: var(--light);
+    height: 10px;
+}
+
+.cart-footer {
+    border-top: 1px solid black;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.total {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.total h6 {
+    font-size: 15px;
+}
+
+.total p {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.cart-footer a {
+    text-decoration: none;
+    font-size: 15px;
+}
+
+.checkout-btn a {
+    display: flex;
+    justify-content: center;
+    width: 40%;
+    color: white;
+    text-decoration: none;
+    background-color: var(--primary);
+    text-align: center;
+    padding: 5px 5px;
+    border-radius: 20px;
+    margin: auto;
+    transition: ease-in-out .5s;
+}
+
+.checkout-btn a:hover {
+    background-color: white;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+}
+
+.checkout-btn a.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
