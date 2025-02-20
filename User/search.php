@@ -1,10 +1,11 @@
 <?php
 include('../database.php');
 session_start(); {
-    if (!isset($_SESSION['user_name'])) {
+    if (!isset($_SESSION['username'])) {
         header("location:../signin.php");
     }
 };
+$username=$_SESSION['username'];
 if(isset($_GET['search'])){
     $search_term = mysqli_real_escape_string($conn, $_GET['search']);
 
@@ -12,6 +13,7 @@ if(isset($_GET['search'])){
     $search_query = "SELECT * FROM products WHERE name LIKE '%$search_term%'"; 
     $result = mysqli_query($conn, $search_query);
 };
+// add to cart 
 if (isset($_POST['add_to_cart'])) {
     $productName = $_POST['product_name'];
     $productPrice = $_POST['product_price'];
@@ -19,22 +21,24 @@ if (isset($_POST['add_to_cart'])) {
     $productQuantity = 1;
 
 
-    $selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE name= '$productName'");
+    $selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE name= '$productName' AND username='$username'");
     if (mysqli_num_rows($selectCart) > 0) {
         header('location:userpage.php');
     } else {
-        $insertCart = mysqli_query($conn, "INSERT INTO cart(name, price, image,quantity) VALUES ('$productName','$productPrice','$productImage','$productQuantity')");
+        $insertCart = mysqli_query($conn, "INSERT INTO cart(name, price, image,quantity,username) VALUES ('$productName','$productPrice','$productImage','$productQuantity','$username')");
     }
 };
 // remove selected item from cart 
 if (isset($_GET['remove'])) {
     $remove_id = $_GET['remove'];
-    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id'");
-};
-// remove all the item from cart  
+    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id' AND username = '$username'");
+    header("Location: " . $_SERVER['PHP_SELF']);
+}
+
+// Remove all items from cart for the user
 if (isset($_GET['delete_all'])) {
-    mysqli_query($conn, "DELETE FROM cart");
-    header('location:userpage.php');
+    mysqli_query($conn, "DELETE FROM cart WHERE username = '$username'");
+    header("Location: " . $_SERVER['PHP_SELF']);
 }
 ?>
 

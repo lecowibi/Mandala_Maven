@@ -49,6 +49,12 @@ input[type="submit"] {
     border: 1px solid #ccc;
     font-size: 16px;
 }
+textarea{
+    width: 100%;
+    height: 90px;
+    padding: 5px 15px;
+    text-align: justify;
+}
 
 /* Input Fields: Focus Effect */
 input[type="text"]:focus,

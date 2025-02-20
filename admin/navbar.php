@@ -1,8 +1,8 @@
 <?php
 include("../database.php");
 session_start(); {
-    if (!isset($_SESSION['admin_name'])) {
-        header("location:../signin.php");
+    if (!isset($_SESSION['username'])) {
+        header("location:../admin-signin.php");
     }
 }
 ?>
@@ -29,6 +29,9 @@ session_start(); {
             <!-- main nabvar  -->
             <div class="navigation">
                 <ul>
+                <a href="admin-homepage.php">
+                        <li >Dashboard</li><span class="design"></span>
+                    </a>
                     <a href="admin.php">
                         <li >Add Products</li><span class="design"></span>
                     </a>
@@ -41,6 +44,13 @@ session_start(); {
                     <a href="order.php">
                         <li>Order Detail</li><span class="design"></span>
                     </a>
+                    <a href="pending_orders.php">
+                        <li>Pending</li><span class="design"></span>
+                    </a>
+                    <a href="delivered_orders.php">
+                        <li>Delivered</li><span class="design"></span>
+                    </a>
+
                 </ul>
             </div>
             <!-- extra navbar i.e searchbar,cart,user  -->
@@ -57,8 +67,8 @@ session_start(); {
                         style="width:30px;height:30px">
                     </lord-icon>
                     <ul>
-                        <li> <?php echo $_SESSION['admin_name'] ?></li>
-                        <li> <a href="../logout.php">Log out</a></li>
+                        <li> <?php echo $_SESSION['username'] ?></li>
+                        <li> <a href="logout.php">Log out</a></li>
                     </ul>
                 </div>
             </div>

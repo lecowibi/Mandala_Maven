@@ -1,10 +1,11 @@
 <?php
 include('../database.php');
 session_start(); {
-    if (!isset($_SESSION['user_name'])) {
+    if (!isset($_SESSION['username'])) {
         header("location:../signin.php");
     }
 };
+$username = $_SESSION['username'];
 if(isset($_GET['search'])){
     $search_term = mysqli_real_escape_string($conn, $_GET['search']);
 
@@ -12,6 +13,7 @@ if(isset($_GET['search'])){
     $search_query = "SELECT * FROM products WHERE name LIKE '%$search_term%'"; 
     $result = mysqli_query($conn, $search_query);
 };
+// add to cart 
 if (isset($_POST['add_to_cart'])) {
     $productName = $_POST['product_name'];
     $productPrice = $_POST['product_price'];
@@ -19,7 +21,7 @@ if (isset($_POST['add_to_cart'])) {
     $productQuantity = 1;
 
 
-    $selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE name= '$productName'");
+    $selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE name= '$productName' AND username='$username'");
     if (mysqli_num_rows($selectCart) > 0) {
         header('location:userpage.php');
     } else {
@@ -29,12 +31,14 @@ if (isset($_POST['add_to_cart'])) {
 // remove selected item from cart 
 if (isset($_GET['remove'])) {
     $remove_id = $_GET['remove'];
-    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id'");
-};
-// remove all the item from cart  
+    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id' AND username = '$username'");
+    header("Location: " . $_SERVER['PHP_SELF']);
+}
+
+// Remove all items from cart for the user
 if (isset($_GET['delete_all'])) {
-    mysqli_query($conn, "DELETE FROM cart");
-    header('location:userpage.php');
+    mysqli_query($conn, "DELETE FROM cart WHERE username = '$username'");
+    header("Location: " . $_SERVER['PHP_SELF']);
 }
 ?>
 <!DOCTYPE html>
@@ -82,7 +86,7 @@ if (isset($_GET['delete_all'])) {
 
         <!-- cart logo from lordicon  -->
         <?php
-        $select_row = mysqli_query($conn, "SELECT * FROM cart") or die('query failed');
+        $select_row = mysqli_query($conn, "SELECT * FROM cart WHERE username='$username'") or die('query failed');
         $row_count = mysqli_num_rows($select_row);
         ?>
         <div class="dropdown2">
@@ -99,7 +103,7 @@ if (isset($_GET['delete_all'])) {
             <ul style="display:none;"> <!-- Hide by default -->
                 <h3 class="baloo">Cart</h3>
                 <?php
-                $select = mysqli_query($conn, "SELECT * FROM cart");
+                $select = mysqli_query($conn, "SELECT * FROM cart WHERE username='$username'");
                 $grand_total = 0;
                 if (mysqli_num_rows($select) > 0) {
                     while ($row = mysqli_fetch_assoc($select)) {
@@ -142,8 +146,9 @@ if (isset($_GET['delete_all'])) {
                 style="width:30px;height:30px">
             </lord-icon>
             <ul>
-                <li> <?php echo $_SESSION['user_name'] ?></li>
+                <li> <?php echo $_SESSION['username'] ?></li>
                 <li> <a href="order.php">Your order</a></li>
+                <li> <a href="../pwdchange.php">Change Details</a></li>
                 <li> <a href="../logout.php">Log out</a></li>
             </ul>
         </div>
@@ -221,28 +226,30 @@ if (isset($_GET['delete_all'])) {
     <h1 class="contact poppin">Contact Artist</h1>
     <h3 class="name poppin">Siddhanta Khanal</h3>
     <p class="phone poppin">9876543210,9865743201</p>
-    <h6 class="gmail poppin">siddhantakhanal@gmail.com</h6>
+    <h6 class="gmail poppin">siddhankhanal3@gmail.com</h6>
     <h6 class="location poppin">Saraswatinagar-6, Kathmandu</h6>
     <div class="link">
-    <a href="#">
+    <a href="https://www.facebook.com/siddhantha.khanal?rdid=BPQSFqI5Arl8vxSk&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1AKXTSFynh%2F">
         <i class="fa-brands fa-facebook-f" style="color: #000000;"></i>
         </a> 
-     <a href="#">
+     <a href="https://www.instagram.com/artbysiddhanta/profilecard/">
         <i class="fa-brands fa-instagram" style="color: #000000;"></i>
         </a> 
-     <a href="#">
+     <a href="https://www.pinterest.com/siddhankhanal3/?invite_code=a2beeec181c744eca7376c63d6f2225d&sender=656188745615447373">
         <i class="fa-brands fa-pinterest-p" style="color: #000000;"></i>
         </a>
     </div>
 </div>
 <!-- form section  -->
-<form action="" class="form">
+<form action="https://api.web3forms.com/submit" method="POST"" class="form">
+    <input type="hidden" name="access_key" value="8801734a-c2be-4913-a03a-7849fa9359b2">
     <div class="name">
-        <input type="text" placeholder="First Name">
-        <input type="text" placeholder="Last Name">
+        <input type="text" placeholder="First Name" name="first-name" required>
+        <input type="text" placeholder="Last Name" name="last-name" required>
     </div>
-    <input type="number" placeholder="Phone Number">
-    <textarea name="Message" placeholder="Message"></textarea>
+    <input type="number" name="number" placeholder="Phone Number" required>
+    <textarea name="Message" name="message" placeholder="Message" required></textarea>
+    <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
     <input type="submit" value="Submit" class="submit_btn">
 </form>
 </section>

@@ -9,21 +9,24 @@ if (isset($_POST['add_product'])) {
     $p_image_tmp = $_FILES['p_image']['tmp_name'];
     $p_image_folder = 'uploaded_images/' . $p_image;
 
-    // Insert product data into the database
-    $insert = "INSERT INTO products(name, price, image, description) VALUES('$p_name', '$p_price', '$p_image','$p_description')";
-    $insert_query = mysqli_query($conn, $insert) or die('Query failed');
-
-    if ($insert_query) {
-        move_uploaded_file($p_image_tmp, $p_image_folder);
-        $message[] = "inserted successfully";
-        
+    // Backend validation to ensure description doesn't exceed 255 characters
+    if (strlen($p_description) > 255) {
+        $message[] = "Description can't be more than 255 characters.";
     } else {
-        $message[] = "inserted unsuccessfully";
+        // Insert product data into the database
+        $insert = "INSERT INTO products(name, price, image, description) VALUES('$p_name', '$p_price', '$p_image','$p_description')";
+        $insert_query = mysqli_query($conn, $insert) or die('Query failed');
+
+        if ($insert_query) {
+            move_uploaded_file($p_image_tmp, $p_image_folder);
+            $message[] = "Inserted successfully";
+        } else {
+            $message[] = "Insertion unsuccessful";
+        }
     }
-};
-
-
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -43,7 +46,7 @@ if (isset($_POST['add_product'])) {
                 <h3>Add a new product</h3>
                 <br><br><input type="text" name="p_name" placeholder="Enter the product name" required>
                 <br><br><input type="number" name="p_price" min="0" placeholder="Enter the product price" required>
-                <br><br><input type="text" name="p_description" placeholder="Enter the Description" required>
+                <br><br><textarea name="p_description" placeholder="Enter the Description" maxlength="255" required></textarea>
                 <br><br><input type="file" name="p_image" accept="image/png, image/jpg, image/jpeg" required>
                 <?php
                 if (isset($message)) {
@@ -55,9 +58,6 @@ if (isset($_POST['add_product'])) {
                 <br><br><input type="submit" value="Add the product" name="add_product">
             </form>
         </section>
-
-       
-
     </div>
     <script src="index.js"></script>
 </body>

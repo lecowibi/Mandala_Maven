@@ -1,0 +1,109 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.admin-container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Dashboard Section */
+.dashboard {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.dashboard h1 {
+    color: #333;
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.dashboard p {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.stat {
+    background-color: #FF902B;
+    color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.stat .num{
+    color: white;
+}
+
+.stat h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.stat p {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Recent Activities Section */
+.recent-activities {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.recent-activities h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.recent-activities ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.recent-activities li {
+    font-size: 16px;
+    color: #555;
+    padding: 10px;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.recent-activities li i {
+    margin-right: 10px;
+    color: #007bff;
+}
+
+.recent-activities li:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-container {
+        width: 90%;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+}

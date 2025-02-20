@@ -26,7 +26,7 @@
 
         <!-- cart logo from lordicon  -->
         <?php
-        $select_row = mysqli_query($conn, "SELECT * FROM cart") or die('query failed');
+        $select_row = mysqli_query($conn, "SELECT * FROM cart WHERE username='$username'") or die('query failed');
         $row_count = mysqli_num_rows($select_row);
         ?>
         <div class="dropdown2">
@@ -43,7 +43,7 @@
             <ul style="display:none;"> <!-- Hide by default -->
                 <h3 class="baloo">Cart</h3>
                 <?php
-                $select = mysqli_query($conn, "SELECT * FROM cart");
+                $select = mysqli_query($conn, "SELECT * FROM cart WHERE username='$username'");
                 $grand_total = 0;
                 if (mysqli_num_rows($select) > 0) {
                     while ($row = mysqli_fetch_assoc($select)) {
@@ -86,8 +86,9 @@
                 style="width:30px;height:30px">
             </lord-icon>
             <ul>
-                <li> <?php echo $_SESSION['user_name'] ?></li>
+                <li> <?php echo $_SESSION['username'] ?></li>
                 <li> <a href="order.php">Your order</a></li>
+                <li> <a href="../pwdchange.php">Change details</a></li>
                 <li> <a href="../logout.php">Log out</a></li>
             </ul>
         </div>

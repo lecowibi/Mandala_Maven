@@ -1,36 +1,49 @@
 <?php
 include("../database.php");
-session_start(); {
-    if (!isset($_SESSION['user_name'])) {
-        header("location:../signin.php");
-    }
-};
-// add to cart  
+session_start();
+if (!isset($_SESSION['username'])) {
+    header("location:../signin.php");
+    exit;
+}
+
+$username = $_SESSION['username'];
+
+// Add to cart
+// Add to cart
 if (isset($_POST['add_to_cart'])) {
     $productName = $_POST['product_name'];
     $productPrice = $_POST['product_price'];
     $productImage = $_POST['product_image'];
     $productQuantity = 1;
 
-
-    $selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE name= '$productName'");
+    $selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE name= '$productName' AND username ='$username'");
     if (mysqli_num_rows($selectCart) > 0) {
-        header("Location: " . $_SERVER['PHP_SELF']);
+        echo "<script>alert('Product is already in the cart!');</script>";
     } else {
-        $insertCart = mysqli_query($conn, "INSERT INTO cart(name, price, image,quantity) VALUES ('$productName','$productPrice','$productImage','$productQuantity')");
+        $insertCart = mysqli_query($conn, "INSERT INTO cart(name, price, image, quantity, username) VALUES ('$productName','$productPrice','$productImage','$productQuantity','$username')");
+        if ($insertCart) {
+            echo "<script>alert('Product has been added to the cart successfully!');</script>";
+        } else {
+            echo "<script>alert('Failed to add product to the cart!');</script>";
+        }
     }
-};
-// remove selected item from cart 
+}
+
+
+// Remove selected item from cart
 if (isset($_GET['remove'])) {
     $remove_id = $_GET['remove'];
-    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id'");
-};
-// remove all the item from cart  
+    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id' AND username = '$username'");
+    header("Location: " . $_SERVER['PHP_SELF']);
+}
+
+// Remove all items from cart for the user
 if (isset($_GET['delete_all'])) {
-    mysqli_query($conn, "DELETE FROM cart");
+    mysqli_query($conn, "DELETE FROM cart WHERE username = '$username'");
     header("Location: " . $_SERVER['PHP_SELF']);
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -83,54 +96,53 @@ if (isset($_GET['delete_all'])) {
 
                 <!-- cart logo from lordicon  -->
                 <?php
-                $select_row = mysqli_query($conn, "SELECT * FROM cart") or die('query failed');
-                $row_count = mysqli_num_rows($select_row);
-                ?>
-                <div class="dropdown2">
-                    <button class="cart2" onclick="toggle()">
-                        <lord-icon
-                            src="https://cdn.lordicon.com/odavpkmb.json"
-                            trigger="hover"
-                            stroke="bold"
-                            colors="primary:#121331,secondary:#000000"
-                            style="width:30px;height:30px">
-                        </lord-icon>
-                        <span class="count"><?php echo $row_count; ?></span>
-                    </button>
-                    <ul style="display:none;"> <!-- Hide by default -->
-                        <h3 class="baloo">Cart</h3>
-                        <?php
-                        $select = mysqli_query($conn, "SELECT * FROM cart");
-                        $grand_total = 0;
-                        if (mysqli_num_rows($select) > 0) {
-                            while ($row = mysqli_fetch_assoc($select)) {
-                        ?>
-                                <li class="cart-item">
-                                    <div class="cart">
-                                        <img src="../admin/uploaded_images/<?php echo $row['image']; ?>" width="40px" alt="">
-                                        <h5 class="poppin"><?php echo $row['name']; ?></h5>
-                                        <p class="poppin">Nrs.<?php echo $row['price']; ?></p>
-                                        <a href="userpage.php?remove=<?php echo $row['id']; ?> " onclick="return confirm('Remove item')" class="btn-remove"><i class="fas fa-trash"></i></a>
-                                    </div>
-                                </li>
-                        <?php
-                                $grand_total += $row['price'] * $row['quantity'];
-                            }
-                        }
-                        ?>
-                        <div class="cart-footer">
-                            <div class="total">
-                                <h6 class="poppin">Total</h6>
-                                <p class="poppin">Nrs. <?php echo $grand_total; ?></p>
-                            </div>
-                            <a href="userpage.php?delete_all" onclick="return confirm('Are you sure! You want to Delete All')" class="btn-remove"><i class="fas fa-trash"></i> Delete All</a>
-                        </div>
-                        <div class="checkout-btn">
-                            <a href="checkout.php" class="checkout-btn poppin <?php echo ($grand_total > 1) ? '' : 'disabled'; ?>">Order Now</a>
-                        </div>
+$select_row = mysqli_query($conn, "SELECT * FROM cart WHERE username = '$username'") or die('query failed');
+$row_count = mysqli_num_rows($select_row);
+?>
+<div class="dropdown2">
+    <button class="cart2" onclick="toggle()">
+        <lord-icon
+            src="https://cdn.lordicon.com/odavpkmb.json"
+            trigger="hover"
+            stroke="bold"
+            colors="primary:#121331,secondary:#000000"
+            style="width:30px;height:30px">
+        </lord-icon>
+        <span class="count"><?php echo $row_count; ?></span>
+    </button>
+    <ul style="display:none;"> <!-- Hide by default -->
+        <h3 class="baloo">Cart</h3>
+        <?php
+        $grand_total = 0;
+        if ($row_count > 0) {
+            while ($row = mysqli_fetch_assoc($select_row)) {
+        ?>
+                <li class="cart-item">
+                    <div class="cart">
+                        <img src="../admin/uploaded_images/<?php echo $row['image']; ?>" width="40px" alt="">
+                        <h5 class="poppin"><?php echo $row['name']; ?></h5>
+                        <p class="poppin">Nrs.<?php echo $row['price']; ?></p>
+                        <a href="userpage.php?remove=<?php echo $row['id']; ?>" onclick="return confirm('Remove item')" class="btn-remove"><i class="fas fa-trash"></i></a>
+                    </div>
+                </li>
+        <?php
+                $grand_total += $row['price'] * $row['quantity'];
+            }
+        }
+        ?>
+        <div class="cart-footer">
+            <div class="total">
+                <h6 class="poppin">Total</h6>
+                <p class="poppin">Nrs. <?php echo $grand_total; ?></p>
+            </div>
+            <a href="userpage.php?delete_all" onclick="return confirm('Are you sure! You want to Delete All')" class="btn-remove"><i class="fas fa-trash"></i> Delete All</a>
+        </div>
+        <div class="checkout-btn">
+            <a href="checkout.php" class="checkout-btn poppin <?php echo ($grand_total > 1) ? '' : 'disabled'; ?>">Order Now</a>
+        </div>
+    </ul>
+</div>
 
-                    </ul>
-                </div>
 
                 <!-- end of cart section  -->
                 <div class="dropdown">
@@ -143,8 +155,9 @@ if (isset($_GET['delete_all'])) {
                         style="width:30px;height:30px">
                     </lord-icon>
                     <ul>
-                        <li> <?php echo $_SESSION['user_name'] ?></li>
+                        <li> <?php echo $_SESSION['username'] ?></li>
                         <li> <a href="order.php">Your order</a></li>
+                        <li> <a href="../pwdchange.php">Change Details</a></li>
                         <li><a href="../logout.php">Log out</a></li>
                     </ul>
                 </div>
@@ -234,7 +247,7 @@ if (isset($_GET['delete_all'])) {
                     <p class="poppin">Wait for your delivery</p>
             </div>
             <div class="card">
-                    <img src="img/decorate.jpg" alt="Error loading image">
+                    <img src="img/decorate.png" alt="Error loading image">
                     <h4 class="poppin">Decorate your room</h4>
                     <p class="poppin">Enjoy our services</p>
             </div>
@@ -256,7 +269,7 @@ if (isset($_GET['delete_all'])) {
     <h1 class="product-title baloo">Special offer for <span>you</span></h1>
     <div class="product-wrapper">
     <?php
-    $fetch_query=mysqli_query($conn,"SELECT*FROM products LIMIT 6");
+    $fetch_query = mysqli_query($conn, "SELECT * FROM products LIMIT 6");
     if(mysqli_num_rows($fetch_query)>0){
         while($fetch=mysqli_fetch_assoc($fetch_query)){
             ?>

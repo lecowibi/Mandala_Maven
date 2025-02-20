@@ -3,57 +3,74 @@ include('../database.php');
 session_start();
 
 // Ensure the user is logged in
-if (!isset($_SESSION['user_name'])) {
+if (!isset($_SESSION['username'])) {
     header("location:../signin.php");
     exit();
 }
+
+// Initialize $fetch_data as an empty array in case the product is not found
+$fetch_data = array(); 
 
 // Fetch product data based on redirect parameter
 if (isset($_GET['redirect'])) {
     $redirect_id = $_GET['redirect'];
     
     // Check if the redirect ID is valid
-        $redirect_query = mysqli_query($conn, "SELECT * FROM products WHERE id='$redirect_id'");
+    $redirect_query = mysqli_query($conn, "SELECT * FROM products WHERE id='$redirect_id'");
 
-        // Check if the query returned any result
-        if (mysqli_num_rows($redirect_query) > 0) {
-            $fetch_data = mysqli_fetch_assoc($redirect_query);
+    // Check if the query returned any result
+    if (mysqli_num_rows($redirect_query) > 0) {
+        $fetch_data = mysqli_fetch_assoc($redirect_query); // Fetch the product data if it exists
+    } else {
+        // If no product is found, set $fetch_data as an empty array to avoid errors
+        echo "No product found";
+    }
+}
+
+if(isset($_GET['search'])){
+    $search_term = mysqli_real_escape_string($conn, $_GET['search']);
+    
+    // Query to search for products that match the search term in the product name
+    $search_query = "SELECT * FROM products WHERE name LIKE '%$search_term%'"; 
+    $result = mysqli_query($conn, $search_query);
+}
+
+$username = $_SESSION['username'];
+
+// Add to cart
+// Add to cart
+if (isset($_POST['add_to_cart'])) {
+    $productName = $_POST['product_name'];
+    $productPrice = $_POST['product_price'];
+    $productImage = $_POST['product_image'];
+    $productQuantity = 1;
+
+    $selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE name= '$productName' AND username ='$username'");
+    if (mysqli_num_rows($selectCart) > 0) {
+        echo "<script>alert('Product is already in the cart!');</script>";
+    } else {
+        $insertCart = mysqli_query($conn, "INSERT INTO cart(name, price, image, quantity, username) VALUES ('$productName','$productPrice','$productImage','$productQuantity','$username')");
+        if ($insertCart) {
+            echo "<script>alert('Product has been added to the cart successfully!');</script>";
         } else {
-            // If no product is found, set $fetch_data as an empty array to avoid errors
-            echo "No product found";
+            echo "<script>alert('Failed to add product to the cart!');</script>";
         }
     }
-    if(isset($_GET['search'])){
-        $search_term = mysqli_real_escape_string($conn, $_GET['search']);
-    
-        // Query to search for products that match the search term in the product name
-        $search_query = "SELECT * FROM products WHERE name LIKE '%$search_term%'"; 
-        $result = mysqli_query($conn, $search_query);
-    };
-    if (isset($_POST['add_to_cart'])) {
-        $productName = $_POST['product_name'];
-        $productPrice = $_POST['product_price'];
-        $productImage = $_POST['product_image'];
-        $productQuantity = 1;
-    
-    
-        $selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE name= '$productName'");
-        if (mysqli_num_rows($selectCart) > 0) {
-            header('location:userpage.php');
-        } else {
-            $insertCart = mysqli_query($conn, "INSERT INTO cart(name, price, image,quantity) VALUES ('$productName','$productPrice','$productImage','$productQuantity')");
-        }
-    };
-    // remove selected item from cart 
-    if (isset($_GET['remove'])) {
-        $remove_id = $_GET['remove'];
-        mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id'");
-    };
-    // remove all the item from cart  
-    if (isset($_GET['delete_all'])) {
-        mysqli_query($conn, "DELETE FROM cart");
-        header('location:userpage.php');
-    }
+}
+
+
+// Remove selected item from cart
+if (isset($_GET['remove'])) {
+    $remove_id = $_GET['remove'];
+    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id' AND username = '$username'");
+    header("Location: " . $_SERVER['PHP_SELF']);
+}
+
+// Remove all items from cart for the user
+if (isset($_GET['delete_all'])) {
+    mysqli_query($conn, "DELETE FROM cart WHERE username = '$username'");
+    header("Location: " . $_SERVER['PHP_SELF']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -75,28 +92,44 @@ if (isset($_GET['redirect'])) {
 <?php
 include('nav.php');
 ?>
+
 <!-- Information section -->
 <section class="container">
     <div class="left">
-         <img src="../admin/uploaded_images/<?php echo $fetch_data['image']; ?>" alt="Product Image">
+        <?php
+        // Check if the fetch_data array is not empty before displaying product image
+        if (!empty($fetch_data)) {
+            echo '<img src="../admin/uploaded_images/' . $fetch_data['image'] . '" alt="Product Image">';
+        } else {
+            echo 'Product not found.';
+        }
+        ?>
     </div>
+
     <!-- End of left section -->
     
     <form action="" method="post" class="right-form">
         <div class="right">
-                <h1 class="name baloo"><?php echo $fetch_data['name']; ?></h1>
-                <h6 class="price poppin">Nrs. <?php echo $fetch_data['price']; ?></h6>
-                <p class="description poppin"><?php echo $fetch_data['description']; ?></p>
-                <div class="shop">
-                    <input type="hidden" name="product_name" value="<?php echo $fetch_data['name']; ?>">
-                    <input type="hidden" name="product_price" value="<?php echo $fetch_data['price']; ?>">
-                    <input type="hidden" name="product_image" value="<?php echo $fetch_data['image']; ?>">
-                    <button type="submit" name="add_to_cart" class="cart-btn poppin">Add to Cart<div class="bg"><i class="fa-solid fa-cart-shopping" style="color: #ffffff;"></i></div></button>
-
-                </div>
+            <?php
+            // Check if the fetch_data array is not empty before displaying product details
+            if (!empty($fetch_data)) {
+                echo '<h1 class="name baloo">' . $fetch_data['name'] . '</h1>';
+                echo '<h6 class="price poppin">Nrs. ' . $fetch_data['price'] . '</h6>';
+                echo '<p class="description poppin">' . $fetch_data['description'] . '</p>';
+            } else {
+                echo 'Product not found.';
+            }
+            ?>
+            <div class="shop">
+                <input type="hidden" name="product_name" value="<?php echo isset($fetch_data['name']) ? $fetch_data['name'] : ''; ?>">
+                <input type="hidden" name="product_price" value="<?php echo isset($fetch_data['price']) ? $fetch_data['price'] : ''; ?>">
+                <input type="hidden" name="product_image" value="<?php echo isset($fetch_data['image']) ? $fetch_data['image'] : ''; ?>">
+                <button type="submit" name="add_to_cart" class="cart-btn poppin">Add to Cart<div class="bg"><i class="fa-solid fa-cart-shopping" style="color: #ffffff;"></i></div></button>
+            </div>
         </div>
     </form>
 </section>
+
 <?php
 include('footer.php');
 ?>
