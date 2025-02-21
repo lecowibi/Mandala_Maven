@@ -4,6 +4,7 @@ session_start();
 
 // Check if the user is logged in and store data from session
 if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id']; // Use session user_id to identify the logged-in user
     $username = $_SESSION['username'];
     $email = $_SESSION['email'];
     $city = $_SESSION['city'];
@@ -12,6 +13,7 @@ if (isset($_SESSION['user_id'])) {
     $number = $_SESSION['number'];
 }
 
+// Handle form submission for placing the order
 if (isset($_POST['order_btn'])) {
     // Capture form data
     $name = $_POST['name'];
@@ -22,43 +24,62 @@ if (isset($_POST['order_btn'])) {
     $landmark = $_POST['landmark'];
     $username = $_POST['username']; // Retrieve the hidden username
 
-    // Query to get items in the cart
-    $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE username='$username'");
+    // Retrieve cart items for the logged-in user
+    $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE user_id = '$user_id'");
     $price_total = 0;
-    $product_name = [];
+    $order_items = [];
 
+    // Check if the user has items in the cart
     if (mysqli_num_rows($cart_query) > 0) {
+        // Loop through each cart item
         while ($product_item = mysqli_fetch_assoc($cart_query)) {
-            $product_name[] = $product_item['name'] . ' (Nrs. ' . $product_item['price'] . ')';
-            $price_total += $product_item['price'] * $product_item['quantity'];
+            // Fetch the product details (name, price)
+            $product_query = mysqli_query($conn, "SELECT name, price FROM products WHERE id = '" . $product_item['product_id'] . "'");
+            $product = mysqli_fetch_assoc($product_query);
+
+            // Calculate the total price
+            $price_total += $product['price'] * $product_item['quantity'];
+
+            // Add the product details to the order_items array
+            $order_items[] = [
+                'product_id' => $product_item['product_id'],
+                'quantity' => $product_item['quantity'],
+                'price' => $product['price'],
+            ];
         }
-    }
 
-    $total_product = implode('<br>', $product_name);
+        // Insert the order into the orders table
+        $order_query = mysqli_query($conn, "INSERT INTO orders (user_id, total_price, status) VALUES ('$user_id', '$price_total', 'Pending')");
 
-    // Insert order details into the database
-    $detail_query = mysqli_query($conn, "INSERT INTO `order` (username, name, phone, email, city, street, landmark, total_product, total_price) 
-        VALUES ('$username', '$name', '$number', '$email', '$city', '$street', '$landmark', '$total_product', '$price_total')");
+        // Get the inserted order ID
+        $order_id = mysqli_insert_id($conn);
 
-    if ($detail_query) {
-        // Delete cart items after successful order
-        $cart_items_query = mysqli_query($conn, "SELECT * FROM cart WHERE username='$username'");
-        if (mysqli_num_rows($cart_items_query) > 0) {
-            while ($cart_item = mysqli_fetch_assoc($cart_items_query)) {
-                $product_name = mysqli_real_escape_string($conn, $cart_item['name']);
-                mysqli_query($conn, "DELETE FROM products WHERE name='$product_name'");
+        // Insert the products into the order_items table
+        foreach ($order_items as $item) {
+            $insert_order_item = mysqli_query($conn, "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ('$order_id', '{$item['product_id']}', '{$item['quantity']}', '{$item['price']}')");
+        }
+
+        // Insert the updated order details into the order_details table
+        $insert_order_details = mysqli_query($conn, "INSERT INTO order_details (order_id, user_id, name, number, email, city, street, landmark) 
+                                                    VALUES ('$order_id', '$user_id', '$name', '$number', '$email', '$city', '$street', '$landmark')");
+
+        // If the order was successfully placed, delete items from the cart
+        if ($order_query && $insert_order_details && count($order_items) > 0) {
+            $delete_cart_query = mysqli_query($conn, "DELETE FROM cart WHERE user_id = '$user_id'");
+
+            if ($delete_cart_query) {
+                echo "<script>
+                    alert('Order placed successfully! We will contact you for delivery.');
+                    window.location.href = 'userpage.php';
+                </script>";
+            } else {
+                echo "<script> alert('Error clearing cart.'); </script>";
             }
+        } else {
+            echo "<script> alert('Error placing the order.'); </script>";
         }
-
-        mysqli_query($conn, "DELETE FROM cart WHERE username='$username'");
-
-        echo "<script>
-            alert('Ordered Successfully! We will contact you on your delivery');
-            window.location.href = 'userpage.php';
-        </script>";
-        exit;
     } else {
-        echo "<script>alert('Failed to place the order. Please try again.');</script>";
+        echo "<script> alert('Your cart is empty.'); </script>";
     }
 }
 ?>
@@ -88,7 +109,7 @@ if (isset($_POST['order_btn'])) {
             </div>
             <div class="input">
                 <span>Number:</span>
-                <input type="number" name="number" placeholder="Enter your number" value="<?php echo $_SESSION['number'] ?? ''; ?>" required>
+                <input type="number" name="number" placeholder="Enter your number" value="<?php echo $number ?? ''; ?>" required>
             </div>
             <div class="input">
                 <span>Email:</span>
@@ -110,15 +131,6 @@ if (isset($_POST['order_btn'])) {
             <!-- Hidden field for username -->
             <input type="hidden" name="username" value="<?php echo $username; ?>">
 
-            <!-- Display confirmation or error message -->
-            <?php
-            if (isset($message)) {
-                foreach ($message as $msg) {
-                    echo "<span class='message'>$msg</span>";
-                }
-            }
-            ?>
-
             <!-- Buttons -->
             <div class="btn">
                 <input type="button" value="Cancel" id="close">
@@ -129,7 +141,11 @@ if (isset($_POST['order_btn'])) {
             <div class="display-order">
                 <h1>Your Order</h1>
                 <?php
-                $select_cart = mysqli_query($conn, "SELECT * FROM cart WHERE username='$username'");
+                // Query to get the user's ID based on their username
+                $select_cart = mysqli_query($conn, "SELECT cart.quantity, products.name, products.price FROM cart 
+                                                    JOIN products ON cart.product_id = products.id 
+                                                    WHERE cart.user_id = '$user_id'");
+
                 $grand_total = 0;
 
                 if (mysqli_num_rows($select_cart) > 0) {
@@ -142,11 +158,13 @@ if (isset($_POST['order_btn'])) {
                         </div>
                         <?php
                     }
+                    // Display total price
+                    echo "<div class='total'>Total: Nrs. $grand_total</div>";
                 } else {
                     echo "<span>Your cart is empty</span>";
                 }
                 ?>
-                <div class="total">Grand Total: <span>Nrs. <?= $grand_total; ?></span></div>
+
             </div>
         </form>
     </section>

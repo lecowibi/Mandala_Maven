@@ -37,19 +37,41 @@ if(isset($_GET['search'])){
 
 $username = $_SESSION['username'];
 
-// Add to cart
-// Add to cart
+/// Add to cart
 if (isset($_POST['add_to_cart'])) {
     $productName = $_POST['product_name'];
     $productPrice = $_POST['product_price'];
     $productImage = $_POST['product_image'];
     $productQuantity = 1;
 
-    $selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE name= '$productName' AND username ='$username'");
+  // First, fetch the user_id based on the username
+$userQuery = mysqli_query($conn, "SELECT id FROM users WHERE username = '$username'");
+$userRow = mysqli_fetch_assoc($userQuery);
+$userId = $userRow['id'];
+
+// Then, fetch the product_id based on the product name
+$productQuery = mysqli_query($conn, "SELECT id FROM products WHERE name = '$productName'");
+$productRow = mysqli_fetch_assoc($productQuery);
+$productId = $productRow['id'];
+
+$selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE user_id = '$userId' AND product_id = '$productId'");
+
     if (mysqli_num_rows($selectCart) > 0) {
         echo "<script>alert('Product is already in the cart!');</script>";
     } else {
-        $insertCart = mysqli_query($conn, "INSERT INTO cart(name, price, image, quantity, username) VALUES ('$productName','$productPrice','$productImage','$productQuantity','$username')");
+       // Fetch the user_id based on the username
+$userQuery = mysqli_query($conn, "SELECT id FROM users WHERE username = '$username'");
+$userRow = mysqli_fetch_assoc($userQuery);
+$userId = $userRow['id'];
+
+// Fetch the product_id based on the product name
+$productQuery = mysqli_query($conn, "SELECT id FROM products WHERE name = '$productName'");
+$productRow = mysqli_fetch_assoc($productQuery);
+$productId = $productRow['id'];
+
+// Now, insert into the cart table with the correct columns
+$insertCart = mysqli_query($conn, "INSERT INTO cart (user_id, product_id, quantity) VALUES ('$userId', '$productId', '$productQuantity')");
+
         if ($insertCart) {
             echo "<script>alert('Product has been added to the cart successfully!');</script>";
         } else {
@@ -62,13 +84,26 @@ if (isset($_POST['add_to_cart'])) {
 // Remove selected item from cart
 if (isset($_GET['remove'])) {
     $remove_id = $_GET['remove'];
-    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id' AND username = '$username'");
+
+    // Fetch the user_id based on the username
+    $userQuery = mysqli_query($conn, "SELECT id FROM users WHERE username = '$username'");
+    $userRow = mysqli_fetch_assoc($userQuery);
+    $userId = $userRow['id'];
+
+    // Delete the cart item where the cart id and user_id match
+    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id' AND user_id = '$userId'");
     header("Location: " . $_SERVER['PHP_SELF']);
 }
 
 // Remove all items from cart for the user
 if (isset($_GET['delete_all'])) {
-    mysqli_query($conn, "DELETE FROM cart WHERE username = '$username'");
+    // Fetch the user_id based on the username
+    $userQuery = mysqli_query($conn, "SELECT id FROM users WHERE username = '$username'");
+    $userRow = mysqli_fetch_assoc($userQuery);
+    $userId = $userRow['id'];
+
+    // Delete all items from the cart for the specific user
+    mysqli_query($conn, "DELETE FROM cart WHERE user_id = '$userId'");
     header("Location: " . $_SERVER['PHP_SELF']);
 }
 ?>

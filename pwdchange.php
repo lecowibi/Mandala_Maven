@@ -22,7 +22,7 @@ if (isset($_POST['update'])) {
     $confirm_password = $_POST['confirm_password'];
 
     // Fetch current user data
-    $query = mysqli_query($conn, "SELECT * FROM user_form WHERE id='$user_id'");
+    $query = mysqli_query($conn, "SELECT * FROM users WHERE id='$user_id'");
     $user = mysqli_fetch_assoc($query);
 
     // Validate current password
@@ -33,7 +33,7 @@ if (isset($_POST['update'])) {
         if (!empty($new_password) && $new_password === $confirm_password) {
             if (preg_match('/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $new_password)) {
                 $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-                $update_query = "UPDATE user_form SET password='$hashed_password' WHERE id='$user_id'";
+                $update_query = "UPDATE users SET password='$hashed_password' WHERE id='$user_id'";
                 mysqli_query($conn, $update_query);
             } else {
                 $error[] = 'New password does not meet requirements';
@@ -43,7 +43,7 @@ if (isset($_POST['update'])) {
         }
 
         // Update other details
-        $update_details_query = "UPDATE user_form SET username='$username', email='$email', city='$city', street='$street', landmark='$landmark', phone='$number' WHERE id='$user_id'";
+        $update_details_query = "UPDATE users SET username='$username', email='$email', city='$city', street='$street', landmark='$landmark', phone='$number' WHERE id='$user_id'";
         if (mysqli_query($conn, $update_details_query)) {
             $success = 'Profile updated successfully';
             header('location:signin.php');
@@ -54,7 +54,8 @@ if (isset($_POST['update'])) {
 }
 
 // Fetch user data for the form
-$user_query = mysqli_query($conn, "SELECT * FROM user_form WHERE id='$user_id'");
+$user_query = mysqli_query($conn, "SELECT * FROM users WHERE id='$user_id'");
+
 $user_data = mysqli_fetch_assoc($user_query);
 ?>
 

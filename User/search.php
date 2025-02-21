@@ -1,44 +1,82 @@
 <?php
 include('../database.php');
-session_start(); {
-    if (!isset($_SESSION['username'])) {
-        header("location:../signin.php");
-    }
-};
-$username=$_SESSION['username'];
+session_start();
+
+// Check if the user is logged in
+if (!isset($_SESSION['username'])) {
+    header("location:../signin.php");
+    exit();
+}
+$username = $_SESSION['username'];
+
 if(isset($_GET['search'])){
     $search_term = mysqli_real_escape_string($conn, $_GET['search']);
-
+    
     // Query to search for products that match the search term in the product name
     $search_query = "SELECT * FROM products WHERE name LIKE '%$search_term%'"; 
     $result = mysqli_query($conn, $search_query);
-};
-// add to cart 
+}
+
+// Add to cart
 if (isset($_POST['add_to_cart'])) {
     $productName = $_POST['product_name'];
     $productPrice = $_POST['product_price'];
     $productImage = $_POST['product_image'];
     $productQuantity = 1;
 
+    // Fetch the user_id based on the username
+    $userQuery = mysqli_query($conn, "SELECT id FROM users WHERE username = '$username'");
+    $userRow = mysqli_fetch_assoc($userQuery);
+    $userId = $userRow['id'];
 
-    $selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE name= '$productName' AND username='$username'");
+    // Fetch the product_id based on the product name
+    $productQuery = mysqli_query($conn, "SELECT id FROM products WHERE name = '$productName'");
+    $productRow = mysqli_fetch_assoc($productQuery);
+    $productId = $productRow['id'];
+
+    // Check if the product is already in the cart
+    $selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE user_id = '$userId' AND product_id = '$productId'");
+
     if (mysqli_num_rows($selectCart) > 0) {
-        header('location:userpage.php');
+        echo "<script>alert('Product is already in the cart!');</script>";
     } else {
-        $insertCart = mysqli_query($conn, "INSERT INTO cart(name, price, image,quantity,username) VALUES ('$productName','$productPrice','$productImage','$productQuantity','$username')");
+        // Insert into the cart table with the correct columns
+        $insertCart = mysqli_query($conn, "INSERT INTO cart (user_id, product_id, quantity) VALUES ('$userId', '$productId', '$productQuantity')");
+
+        if ($insertCart) {
+            echo "<script>alert('Product has been added to the cart successfully!');</script>";
+        } else {
+            echo "<script>alert('Failed to add product to the cart!');</script>";
+        }
     }
-};
-// remove selected item from cart 
+}
+
+// Remove selected item from cart
 if (isset($_GET['remove'])) {
     $remove_id = $_GET['remove'];
-    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id' AND username = '$username'");
+
+    // Fetch the user_id based on the username
+    $userQuery = mysqli_query($conn, "SELECT id FROM users WHERE username = '$username'");
+    $userRow = mysqli_fetch_assoc($userQuery);
+    $userId = $userRow['id'];
+
+    // Delete the cart item where the cart id and user_id match
+    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id' AND user_id = '$userId'");
     header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
 }
 
 // Remove all items from cart for the user
 if (isset($_GET['delete_all'])) {
-    mysqli_query($conn, "DELETE FROM cart WHERE username = '$username'");
+    // Fetch the user_id based on the username
+    $userQuery = mysqli_query($conn, "SELECT id FROM users WHERE username = '$username'");
+    $userRow = mysqli_fetch_assoc($userQuery);
+    $userId = $userRow['id'];
+
+    // Delete all items from the cart for the specific user
+    mysqli_query($conn, "DELETE FROM cart WHERE user_id = '$userId'");
     header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
 }
 ?>
 
@@ -60,30 +98,35 @@ if (isset($_GET['delete_all'])) {
 <?php
 include('nav.php');
 ?>
-<!-- end of navbar  -->
-    <h1 class="search-title baloo">Search Results for "<?php echo $search_term; ?>"</h1>
-    <div class="wrapper">
+
+<h1 class="search-title baloo">Search Results for "<?php echo $search_term; ?>"</h1>
+<div class="wrapper">
     <?php 
     if(mysqli_num_rows($result) > 0) {
         while($row = mysqli_fetch_assoc($result)) {
             ?>
-            <div class="card"> <!-- Moved the card div inside the loop -->
+            <div class="card">
                 <form action="" method="post">
-                    <!-- image of the card  -->
-                   <a href="redirect.php?redirect=<?php echo $row['id']; ?>">
-                   <img src="../admin/uploaded_images/<?php echo $row['image']; ?>" alt="error loading image">
-                   <!-- title price of the card  -->
-                   </a>
+                    <!-- Image of the card -->
+                    <a href="redirect.php?redirect=<?php echo $row['id']; ?>">
+                        <img src="../admin/uploaded_images/<?php echo $row['image']; ?>" alt="error loading image">
+                    </a>
+                    <!-- Title and price of the card -->
                     <div class="title">
                         <p class="title_name baloo"><?php echo $row['name']; ?></p>
                         <p class="price baloo">Nrs. <?php echo $row['price']; ?></p>
                     </div>
-                    <!-- shop and cart in card  -->
+                    <!-- Shop and Cart in card -->
                     <div class="shop">
+                        <!-- Hidden fields to pass product details to cart -->
                         <input type="hidden" name="product_name" value="<?php echo $row['name']; ?>">
                         <input type="hidden" name="product_price" value="<?php echo $row['price']; ?>">
                         <input type="hidden" name="product_image" value="<?php echo $row['image']; ?>">
-                        <a href="#"><input type="submit" name="add_to_cart" class="buy_btn poppin" value="Add to Cart"></a>
+
+                        <!-- Add to Cart Button -->
+                        <input type="submit" name="add_to_cart" class="buy_btn poppin" value="Add to Cart">
+                        
+                        <!-- Cart Icon -->
                         <div class="cart">
                             <lord-icon
                                 src="https://cdn.lordicon.com/odavpkmb.json"
@@ -104,7 +147,7 @@ include('nav.php');
     ?>
 </div>
 
-    <script src="https://cdn.lordicon.com/lordicon.js"></script>
-    <script src="js/index.js"></script>
+<script src="https://cdn.lordicon.com/lordicon.js"></script>
+<script src="js/index.js"></script>
 </body>
 </html>

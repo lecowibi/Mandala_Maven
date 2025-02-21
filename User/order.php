@@ -8,42 +8,61 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Store the username from the session
+// Store the username from the session and fetch user_id
 $username = $_SESSION['username'];
+$user_query = mysqli_query($conn, "SELECT id FROM users WHERE username='$username'");
+$user_data = mysqli_fetch_assoc($user_query);
+$user_id = $user_data['id']; // Fetch user ID
 
-// Cancel specific order by updating status to 'Cancelled' and restoring product visibility
+// Handle order cancellation
 if (isset($_GET['cancel'])) {
     $cancel_id = mysqli_real_escape_string($conn, $_GET['cancel']);
 
     // Fetch the product details of the canceled order
-    $order_query = mysqli_query($conn, "SELECT total_product FROM `order` WHERE id='$cancel_id' AND username='$username' AND status='Pending'");
-    if ($order_query && mysqli_num_rows($order_query) > 0) {
-        $order_data = mysqli_fetch_assoc($order_query);
-        $products = explode('<br>', $order_data['total_product']); // Extract product names
+    $order_query = mysqli_query($conn, "SELECT oi.product_id, oi.quantity 
+                                        FROM order_items oi
+                                        JOIN orders o ON oi.order_id = o.id
+                                        WHERE o.id='$cancel_id' AND o.user_id='$user_id' AND o.status='Pending'");
 
-        // Restore visibility for the products
-        foreach ($products as $product_detail) {
-            preg_match('/(.+?) \(Nrs\./', $product_detail, $matches); // Extract product name
-            if (isset($matches[1])) {
-                $product_name = mysqli_real_escape_string($conn, trim($matches[1]));
-                mysqli_query($conn, "UPDATE products SET visible = 1 WHERE name = '$product_name'");
+    // Check if the order and items exist
+    if ($order_query && mysqli_num_rows($order_query) > 0) {
+        // Loop through the products of the canceled order
+        while ($order_item = mysqli_fetch_assoc($order_query)) {
+            $product_id = $order_item['product_id'];
+            $quantity = $order_item['quantity'];
+
+            // Restore visibility for the product (make the product available again)
+            $update_product_query = "UPDATE products SET visible = 1 WHERE id = '$product_id'";
+            if (!mysqli_query($conn, $update_product_query)) {
+                die("Failed to restore product visibility: " . mysqli_error($conn));
             }
         }
-    }
 
-    // Update order status to "Cancelled"
-    $cancelOrder = mysqli_query($conn, "UPDATE `order` SET status='Cancelled' WHERE id='$cancel_id' AND username='$username'");
-    if (!$cancelOrder) {
-        die("Cancel Order Failed: " . mysqli_error($conn));
+        // Update the order status to "Cancelled"
+        $update_order_query = "UPDATE orders SET status='Cancelled' WHERE id='$cancel_id' AND user_id='$user_id' AND status='Pending'";
+        $cancelOrder = mysqli_query($conn, $update_order_query);
+
+        if (!$cancelOrder) {
+            die("Cancel Order Failed: " . mysqli_error($conn));
+        } else {
+            echo "<script>
+                alert('Order has been successfully cancelled.');
+                window.location.href = 'order.php';
+            </script>";
+            exit;
+        }
     } else {
+        // If no order items are found or order doesn't exist
         echo "<script>
-            alert('Order has been successfully cancelled.');
+            alert('The order could not be found or is already processed.');
             window.location.href = 'order.php';
         </script>";
         exit;
     }
 }
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,8 +99,11 @@ if (isset($_GET['cancel'])) {
         </thead>
         <tbody>
             <?php
-            // Fetch all orders for the current user
-            $select_orders = mysqli_query($conn, "SELECT * FROM `order` WHERE username='$username' ORDER BY id DESC");
+            // Fetch all orders for the current user along with order details
+            $select_orders = mysqli_query($conn, "SELECT o.*, od.name, od.number, od.email, od.city, od.street, od.landmark 
+                                                  FROM orders o 
+                                                  JOIN order_details od ON o.id = od.order_id
+                                                  WHERE o.user_id='$user_id' ORDER BY o.id DESC");
 
             if (!$select_orders) {
                 die("Query Failed: " . mysqli_error($conn));
@@ -103,12 +125,24 @@ if (isset($_GET['cancel'])) {
             ?>
                     <tr>
                         <td><?php echo htmlspecialchars($row['name']); ?></td>
-                        <td><?php echo htmlspecialchars($row['phone']); ?></td>
+                        <td><?php echo htmlspecialchars($row['number']); ?></td>
                         <td><?php echo htmlspecialchars($row['email']); ?></td>
                         <td><?php echo htmlspecialchars($row['city']); ?></td>
                         <td><?php echo htmlspecialchars($row['street']); ?></td>
                         <td><?php echo htmlspecialchars($row['landmark']); ?></td>
-                        <td class="order"><?php echo $row['total_product']; ?></td>
+                        <td class="order"><?php 
+                            // Fetch and display the ordered products and quantities
+                            $order_items_query = mysqli_query($conn, "SELECT oi.quantity, p.name
+                                                FROM order_items oi 
+                                                JOIN products p ON oi.product_id = p.id
+                                                WHERE oi.order_id = '" . $row['id'] . "'");
+
+                            $ordered_products = [];
+                            while ($item = mysqli_fetch_assoc($order_items_query)) {
+                                $ordered_products[] = $item['name'] . " (" . $item['quantity'] . ")";
+                            }
+                            echo implode('<br>', $ordered_products);
+                        ?></td>
                         <td>Nrs. <?php echo htmlspecialchars($row['total_price']); ?></td>
                         <td>
                             <span class="<?php echo strtolower($row['status']); ?>">

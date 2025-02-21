@@ -13,8 +13,8 @@ if (isset($_POST["submit"])) {
     $cpassword = $_POST["cpassword"];
 
     // Checking if the email or username already exists
-    $email_check_query = mysqli_query($conn, "SELECT * FROM user_form WHERE email='$email'");
-    $username_check_query = mysqli_query($conn, "SELECT * FROM user_form WHERE username='$username'");
+    $email_check_query = mysqli_query($conn, "SELECT * FROM users WHERE email='$email'");
+    $username_check_query = mysqli_query($conn, "SELECT * FROM users WHERE username='$username'");
 
     if (mysqli_num_rows($email_check_query) > 0) {
         $error[] = 'Email already exists!';
@@ -24,14 +24,16 @@ if (isset($_POST["submit"])) {
         // Checking if passwords match
         if ($password !== $cpassword) {
             $error[] = 'Passwords do not match';
-        } elseif (!preg_match('/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password)) {
-            $error[] = 'Password must be at least 8 characters long, contain at least one uppercase letter, one number, and one special character.';
-        } else {
+        }
+        else {
             // Hashing the password securely
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            $sql = "INSERT INTO user_form(username, password, email, city, street, landmark, phone) VALUES('$username', '$hash', '$email', '$city', '$street', '$landmark', '$number')";
 
-            if (mysqli_query($conn, $sql)) {
+            // Using prepared statement to prevent SQL injection
+            $stmt = $conn->prepare("INSERT INTO users (username, password, email, phone, city, street, landmark) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssssss", $username, $hash, $email, $number, $city, $street, $landmark);
+            
+            if ($stmt->execute()) {
                 header('Location: signin.php');
                 exit(); // Exit after redirect
             } else {
@@ -133,20 +135,82 @@ if (isset($_POST["submit"])) {
             <p>Already have an account? <a href="signin.php">Sign in</a></p>
         </form>
     </div>
-    <script>
-    function validatePhoneNumber(input) {
-        const numberError = document.getElementById('number-error');
 
-        // Check if the input value is exactly 10 digits
-        if (input.value.length !== 10) {
-            numberError.textContent = 'Phone number must be exactly 10 digits.';
-        } else {
-            numberError.textContent = '';
+    <script>
+        // Function to validate the phone number format
+        function validatePhoneNumber(input) {
+            let value = input.value;
+            let errorMessage = document.getElementById("number-error");
+            if (!/^\d{10}$/.test(value)) {
+                errorMessage.textContent = "Please enter a valid 10-digit phone number.";
+            } else {
+                errorMessage.textContent = "";
+            }
         }
-    }
-</script>
+
+        // Function to validate the password strength and match
+        function validatePassword(password) {
+            const errorMessage = document.getElementById("password-error");
+            let passwordValid = true;
+            
+       
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (!passwordRegex.test(password.value)) {
+                passwordValid = false;
+                errorMessage.textContent = "Password must be at least 8 characters long, include an uppercase letter, a number, and a special character.";
+            } else {
+                errorMessage.textContent = "";
+            }
+            return passwordValid;
+        }
+
+        // Form validation before submission
+        document.getElementById('registration-form').addEventListener('submit', function (event) {
+            let formValid = true;
+
+            // Validate username 
+            const username = document.querySelector('input[name="username"]');
+            if (username.value.trim() === "") {
+                formValid = false;
+                document.getElementById("username-error").textContent = "Username is required.";
+            }
+
+            // Validate email format 
+            const email = document.querySelector('input[name="email"]');
+            const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            if (!emailRegex.test(email.value)) {
+                formValid = false;
+                document.getElementById("email-error").textContent = "Please enter a valid email.";
+            }
+
+            // Validating phone number must be 10 digits
+            const phone = document.querySelector('input[name="number"]');
+            if (!/^\d{10}$/.test(phone.value)) {
+                formValid = false;
+                document.getElementById("number-error").textContent = "Phone number must be 10 digits.";
+            }
+
+            // Validate passwords match
+            const password = document.querySelector('input[name="password"]');
+            const confirmPassword = document.querySelector('input[name="cpassword"]');
+            if (password.value !== confirmPassword.value) {
+                formValid = false;
+                document.getElementById("cpassword-error").textContent = "Passwords do not match.";
+            }
+
+            // Validate password strength
+            if (!validatePassword(password)) {
+                formValid = false;
+            }
+
+            // Prevent form submission if validation fails
+            if (!formValid) {
+                event.preventDefault();
+            }
+        });
+    </script>
+
+
 </body>
 
 </html>
-
-

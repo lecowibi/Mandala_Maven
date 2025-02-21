@@ -9,18 +9,40 @@ if (!isset($_SESSION['username'])) {
 $username = $_SESSION['username'];
 
 // Add to cart
-// Add to cart
 if (isset($_POST['add_to_cart'])) {
     $productName = $_POST['product_name'];
     $productPrice = $_POST['product_price'];
     $productImage = $_POST['product_image'];
     $productQuantity = 1;
 
-    $selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE name= '$productName' AND username ='$username'");
+  // First, fetch the user_id based on the username
+$userQuery = mysqli_query($conn, "SELECT id FROM users WHERE username = '$username'");
+$userRow = mysqli_fetch_assoc($userQuery);
+$userId = $userRow['id'];
+
+// Then, fetch the product_id based on the product name
+$productQuery = mysqli_query($conn, "SELECT id FROM products WHERE name = '$productName'");
+$productRow = mysqli_fetch_assoc($productQuery);
+$productId = $productRow['id'];
+
+$selectCart = mysqli_query($conn, "SELECT * FROM cart WHERE user_id = '$userId' AND product_id = '$productId'");
+
     if (mysqli_num_rows($selectCart) > 0) {
         echo "<script>alert('Product is already in the cart!');</script>";
     } else {
-        $insertCart = mysqli_query($conn, "INSERT INTO cart(name, price, image, quantity, username) VALUES ('$productName','$productPrice','$productImage','$productQuantity','$username')");
+       // Fetch the user_id based on the username
+$userQuery = mysqli_query($conn, "SELECT id FROM users WHERE username = '$username'");
+$userRow = mysqli_fetch_assoc($userQuery);
+$userId = $userRow['id'];
+
+// Fetch the product_id based on the product name
+$productQuery = mysqli_query($conn, "SELECT id FROM products WHERE name = '$productName'");
+$productRow = mysqli_fetch_assoc($productQuery);
+$productId = $productRow['id'];
+
+// Now, insert into the cart table with the correct columns
+$insertCart = mysqli_query($conn, "INSERT INTO cart (user_id, product_id, quantity) VALUES ('$userId', '$productId', '$productQuantity')");
+
         if ($insertCart) {
             echo "<script>alert('Product has been added to the cart successfully!');</script>";
         } else {
@@ -33,15 +55,29 @@ if (isset($_POST['add_to_cart'])) {
 // Remove selected item from cart
 if (isset($_GET['remove'])) {
     $remove_id = $_GET['remove'];
-    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id' AND username = '$username'");
+
+    // Fetch the user_id based on the username
+    $userQuery = mysqli_query($conn, "SELECT id FROM users WHERE username = '$username'");
+    $userRow = mysqli_fetch_assoc($userQuery);
+    $userId = $userRow['id'];
+
+    // Delete the cart item where the cart id and user_id match
+    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id' AND user_id = '$userId'");
     header("Location: " . $_SERVER['PHP_SELF']);
 }
 
 // Remove all items from cart for the user
 if (isset($_GET['delete_all'])) {
-    mysqli_query($conn, "DELETE FROM cart WHERE username = '$username'");
+    // Fetch the user_id based on the username
+    $userQuery = mysqli_query($conn, "SELECT id FROM users WHERE username = '$username'");
+    $userRow = mysqli_fetch_assoc($userQuery);
+    $userId = $userRow['id'];
+
+    // Delete all items from the cart for the specific user
+    mysqli_query($conn, "DELETE FROM cart WHERE user_id = '$userId'");
     header("Location: " . $_SERVER['PHP_SELF']);
 }
+
 ?>
 
 
@@ -94,11 +130,20 @@ if (isset($_GET['delete_all'])) {
                     <button type="submit" class="search_btn"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </form>
 
-                <!-- cart logo from lordicon  -->
-                <?php
-$select_row = mysqli_query($conn, "SELECT * FROM cart WHERE username = '$username'") or die('query failed');
+ <!-- Cart logo from lordicon -->
+<?php
+// Assuming $username is already sanitized and contains the username
+$select_user_query = mysqli_query($conn, "SELECT id FROM users WHERE username = '$username'") or die('query failed');
+$user = mysqli_fetch_assoc($select_user_query);
+$user_id = $user['id']; // The user ID from the users table
+
+// Now, query the cart table using user_id to get cart items
+$select_row = mysqli_query($conn, "SELECT cart.*, products.name, products.price, products.image FROM cart
+                                   JOIN products ON cart.product_id = products.id
+                                   WHERE cart.user_id = '$user_id'") or die('query failed');
 $row_count = mysqli_num_rows($select_row);
 ?>
+
 <div class="dropdown2">
     <button class="cart2" onclick="toggle()">
         <lord-icon
@@ -121,11 +166,12 @@ $row_count = mysqli_num_rows($select_row);
                     <div class="cart">
                         <img src="../admin/uploaded_images/<?php echo $row['image']; ?>" width="40px" alt="">
                         <h5 class="poppin"><?php echo $row['name']; ?></h5>
-                        <p class="poppin">Nrs.<?php echo $row['price']; ?></p>
+                        <p class="poppin">Nrs. <?php echo $row['price']; ?></p> 
                         <a href="userpage.php?remove=<?php echo $row['id']; ?>" onclick="return confirm('Remove item')" class="btn-remove"><i class="fas fa-trash"></i></a>
                     </div>
                 </li>
         <?php
+                // Calculate the grand total (price * quantity)
                 $grand_total += $row['price'] * $row['quantity'];
             }
         }
@@ -138,10 +184,12 @@ $row_count = mysqli_num_rows($select_row);
             <a href="userpage.php?delete_all" onclick="return confirm('Are you sure! You want to Delete All')" class="btn-remove"><i class="fas fa-trash"></i> Delete All</a>
         </div>
         <div class="checkout-btn">
-            <a href="checkout.php" class="checkout-btn poppin <?php echo ($grand_total > 1) ? '' : 'disabled'; ?>">Order Now</a>
+            <!-- Enable the 'Order Now' button only if total is greater than 0 -->
+            <a href="checkout.php" class="checkout-btn poppin <?php echo ($grand_total > 0) ? '' : 'disabled'; ?>">Order Now</a>
         </div>
     </ul>
 </div>
+
 
 
                 <!-- end of cart section  -->
@@ -181,12 +229,12 @@ $row_count = mysqli_num_rows($select_row);
         <!-- popular trend  -->
 
         <div class="pop-trend">
-            <h1 class="trend baloo">Popular <span>Art</span></h1>
+            <h1 class="trend baloo">Latest <span>Art</span></h1>
             <div class="wrapper">
                 <!-- card section  -->
                 <?php
                 // Fetch random products
-                $query = "SELECT * FROM products ORDER BY RAND() LIMIT 3";
+                $query = "SELECT * FROM products ORDER BY id DESC LIMIT 3";
                 $result = mysqli_query($conn, $query);
 
                 // Display the fetched data
@@ -266,10 +314,10 @@ $row_count = mysqli_num_rows($select_row);
      </section>
      <!-- end of about us  -->
      <section class=" about-product">
-    <h1 class="product-title baloo">Special offer for <span>you</span></h1>
+    <h1 class="product-title baloo">Our <span>product</span></h1>
     <div class="product-wrapper">
     <?php
-    $fetch_query = mysqli_query($conn, "SELECT * FROM products LIMIT 6");
+    $fetch_query = mysqli_query($conn, "SELECT * FROM products ORDER BY RAND() LIMIT 6");
     if(mysqli_num_rows($fetch_query)>0){
         while($fetch=mysqli_fetch_assoc($fetch_query)){
             ?>
