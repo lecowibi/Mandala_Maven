@@ -28,13 +28,14 @@ if (isset($_POST['order_btn'])) {
     $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE user_id = '$user_id'");
     $price_total = 0;
     $order_items = [];
+    $admin_id = null; // Initialize admin_id to null
 
     // Check if the user has items in the cart
     if (mysqli_num_rows($cart_query) > 0) {
         // Loop through each cart item
         while ($product_item = mysqli_fetch_assoc($cart_query)) {
-            // Fetch the product details (name, price)
-            $product_query = mysqli_query($conn, "SELECT name, price FROM products WHERE id = '" . $product_item['product_id'] . "'");
+            // Fetch the product details (name, price, and admin_id)
+            $product_query = mysqli_query($conn, "SELECT name, price, admin_id FROM products WHERE id = '" . $product_item['product_id'] . "'");
             $product = mysqli_fetch_assoc($product_query);
 
             // Calculate the total price
@@ -45,23 +46,31 @@ if (isset($_POST['order_btn'])) {
                 'product_id' => $product_item['product_id'],
                 'quantity' => $product_item['quantity'],
                 'price' => $product['price'],
+                'admin_id' => $product['admin_id'], // Store admin_id for each product
             ];
+
+            // Since the admin_id should be the same for all products in the cart, we can take the admin_id from the first product
+            if ($admin_id === null) {
+                $admin_id = $product['admin_id']; // Set the admin_id for the first product
+            }
         }
 
-        // Insert the order into the orders table
-        $order_query = mysqli_query($conn, "INSERT INTO orders (user_id, total_price, status) VALUES ('$user_id', '$price_total', 'Pending')");
+        // Insert the order into the orders table with the admin_id
+        $order_query = mysqli_query($conn, "INSERT INTO orders (user_id, total_price, status, admin_id) 
+                                            VALUES ('$user_id', '$price_total', 'Pending', '$admin_id')");
 
         // Get the inserted order ID
         $order_id = mysqli_insert_id($conn);
 
-        // Insert the products into the order_items table
+        // Insert the products into the order_items table with admin_id
         foreach ($order_items as $item) {
-            $insert_order_item = mysqli_query($conn, "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ('$order_id', '{$item['product_id']}', '{$item['quantity']}', '{$item['price']}')");
+            $insert_order_item = mysqli_query($conn, "INSERT INTO order_items (order_id, product_id, quantity, price, admin_id) 
+                                                      VALUES ('$order_id', '{$item['product_id']}', '{$item['quantity']}', '{$item['price']}', '{$item['admin_id']}')");
         }
 
-        // Insert the updated order details into the order_details table
-        $insert_order_details = mysqli_query($conn, "INSERT INTO order_details (order_id, user_id, name, number, email, city, street, landmark) 
-                                                    VALUES ('$order_id', '$user_id', '$name', '$number', '$email', '$city', '$street', '$landmark')");
+        // Insert the updated order details into the order_details table with admin_id
+        $insert_order_details = mysqli_query($conn, "INSERT INTO order_details (order_id, user_id, name, number, email, city, street, landmark, admin_id) 
+                                                    VALUES ('$order_id', '$user_id', '$name', '$number', '$email', '$city', '$street', '$landmark', '$admin_id')");
 
         // If the order was successfully placed, delete items from the cart
         if ($order_query && $insert_order_details && count($order_items) > 0) {

@@ -1,47 +1,41 @@
 <?php
 include('database.php');
+session_start();
 
+// Process form submission (no backend validation but check if email/username already exists)
 if (isset($_POST["submit"])) {
-    // Escaping user inputs
+    // Saving the data (no validation on the server side)
     $username = mysqli_real_escape_string($conn, $_POST["username"]);
     $email = mysqli_real_escape_string($conn, $_POST["email"]);
     $password = $_POST["password"];
-    $cpassword = $_POST["cpassword"];
 
-    // Checking if the email already exists
-    $email_check = "SELECT * FROM admin_form WHERE email='$email'";
-    $username_check = "SELECT * FROM admin_form WHERE username='$username'";
-    
-    $email_check_query = mysqli_query($conn, $email_check);
-    $username_check_query = mysqli_query($conn, $username_check);
+    // Check if email or username already exists in the database
+    $email_check_query = "SELECT * FROM admin WHERE email='$email'";
+    $username_check_query = "SELECT * FROM admin WHERE username='$username'";
 
-    if(mysqli_num_rows($email_check_query) > 0) {
-        $error[] = 'email already exists!';
-    } 
-    elseif (mysqli_num_rows($username_check_query) > 0) {
-        $error[] = 'Username already exists!';
-    } 
-    
-    else {
-        // Checking if passwords match
-        if ($password != $cpassword) {
-            $error[] = 'Passwords do not match';
+    $email_check_result = mysqli_query($conn, $email_check_query);
+    $username_check_result = mysqli_query($conn, $username_check_query);
+
+    if (mysqli_num_rows($email_check_result) > 0) {
+        echo "<script>alert('Email already exists. Please choose a different email.');</script>";
+    } elseif (mysqli_num_rows($username_check_result) > 0) {
+        echo "<script>alert('Username already exists. Please choose a different username.');</script>";
+    } else {
+        // Inserting the user with 'approved' status as 0 (not approved yet)
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        $sql = "INSERT INTO admin (username, password, email, approved) VALUES ('$username', '$hashed_password', '$email', 0)";
+
+        if (mysqli_query($conn, $sql)) {
+            // Success: Show alert
+            echo "<script>alert('Registration Successful! Please wait for admin approval.'); window.location.href = 'admin-register.php';</script>";
+            exit();
         } else {
-            // Hashing the password securely
-            $hash = password_hash($password, PASSWORD_DEFAULT);
-            $sql = "INSERT INTO admin_form(username, password, email) VALUES('$username', '$hash', '$email')";
-            
-            if (mysqli_query($conn, $sql)) {
-                header('Location: admin-signin.php');
-                exit(); // Exit after redirect
-            } else {
-                $error[] = 'Failed to create account. Please try again.';
-            }
+            // Failed to insert
+            echo "<script>alert('Error: Could not register. Please try again.');</script>";
         }
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -50,67 +44,98 @@ if (isset($_POST["submit"])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign up</title>
     <link rel="stylesheet" href="css/form.css">
-    <!-- font awesome cdn -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        .errormsg {
+            color: red;
+            font-size: 0.9em;
+        }
+    </style>
 </head>
 <body>
 <div class="sign">
-<div class="wrapper">
-            <img src="img/main.png" alt="">
-        </div>
-    <form action="" method="post">
+    <div class="wrapper">
+        <img src="img/main.png" alt="">
+    </div>
+    <form id="registerForm" action="" method="post" onsubmit="return validateForm()">
         <h1>Sign Up</h1>
         <div class="input">
-        <i class="fa-solid fa-user"></i>
-            <input type="text" name="username" required placeholder="Username">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" name="username" id="username" required placeholder="Username">
+            <span class="errormsg" id="username-error"></span>
         </div>
         <div class="input">
-        <i class="fa-solid fa-envelope"></i>
-        <input type="email" name="email" required placeholder="Email">
-        
+            <i class="fa-solid fa-envelope"></i>
+            <input type="email" name="email" id="email" required placeholder="Email">
+            <span class="errormsg" id="email-error"></span>
         </div>
         <div class="input">
-        <i class="fa-solid fa-lock"></i>
-        <input type="password" name="password" required placeholder="Password">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" name="password" id="password" required placeholder="Password">
+            <span class="errormsg" id="password-error"></span>
         </div>
         <div class="input">
-        <i class="fa-solid fa-lock"></i>
-        <input type="password" name="cpassword" required placeholder="Confirm Password">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" name="cpassword" id="cpassword" required placeholder="Confirm Password">
+            <span class="errormsg" id="cpassword-error"></span>
         </div>
-        <?php
-        if(isset($error)){
-            foreach($error as $errors){
-            echo "<span class='errormsg'>" .$errors. "</span>";
-            }
-        }
-        ?>
+
         <input type="submit" value="Sign Up" name="submit" class="btn">
-        <p>Already have an account?  <a href="admin-signin.php">Sign in</a></p>
+        <p>Already have an account? <a href="admin-signin.php">Sign in</a></p>
     </form>
 </div>
+
 <script>
-    document.querySelector('form').addEventListener('submit', function(e) {
-        let password = document.querySelector('input[name="password"]').value;
-        let cpassword = document.querySelector('input[name="cpassword"]').value;
-        let errorMessage = '';
+    function validateForm() {
+        let valid = true;
 
-        // Regular expression for validating the password
-        let passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        // Get form elements
+        const username = document.getElementById('username');
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+        const cpassword = document.getElementById('cpassword');
+        
+        // Error spans
+        const usernameError = document.getElementById('username-error');
+        const emailError = document.getElementById('email-error');
+        const passwordError = document.getElementById('password-error');
+        const cpasswordError = document.getElementById('cpassword-error');
 
-        if (password !== cpassword) {
-            errorMessage = 'Passwords do not match.';
-        } else if (!passwordRegex.test(password)) {
-            errorMessage = 'Password must be at least 8 characters long, contain at least one uppercase letter, one number, and one special character.';
+        // Reset error messages
+        usernameError.textContent = '';
+        emailError.textContent = '';
+        passwordError.textContent = '';
+        cpasswordError.textContent = '';
+
+        // Validate username
+        if (username.value.length < 3) {
+            usernameError.textContent = 'Username must be at least 3 characters long.';
+            valid = false;
         }
 
-        // If there's an error, prevent form submission and show the error
-        if (errorMessage) {
-            e.preventDefault(); 
-            alert(errorMessage); 
+        // Validate email (basic format check)
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+        if (!email.value.match(emailPattern)) {
+            emailError.textContent = 'Please enter a valid email address.';
+            valid = false;
         }
-    });
+
+        // Validate password (min 8 characters, 1 uppercase, 1 number, 1 special char)
+        const passwordPattern = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!password.value.match(passwordPattern)) {
+            passwordError.textContent = 'Password must be at least 8 characters, 1 uppercase, 1 number, and 1 special character.';
+            valid = false;
+        }
+
+        // Validate confirm password (must match password)
+        if (password.value !== cpassword.value) {
+            cpasswordError.textContent = 'Passwords do not match.';
+            valid = false;
+        }
+
+        return valid;
+    }
 </script>
 
 </body>
-
 </html>
