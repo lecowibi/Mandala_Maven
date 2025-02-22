@@ -1,30 +1,38 @@
 <?php
 include('../database.php');  // Include your database connection file
+include("navbar.php");
+
+// Fetch the admin ID from the session
+$admin_id = isset($_SESSION['admin_id']) ? $_SESSION['admin_id'] : null; 
+
+// If admin ID is not set, redirect to login page
+if (!$admin_id) {
+    header('Location: login.php');
+    exit();
+}
 
 
-// Fetch the admin username from the session
-$admin_username = isset($_SESSION['admin_username']) ? $_SESSION['admin_username'] : 'Admin';
 
-// Fetch the total number of products
-$product_query = "SELECT COUNT(*) AS total_products FROM products";
+// Fetch the total number of products added by this admin
+$product_query = "SELECT COUNT(*) AS total_products FROM products WHERE admin_id = '$admin_id'";
 $product_result = mysqli_query($conn, $product_query);
 $product_data = mysqli_fetch_assoc($product_result);
 $total_products = $product_data['total_products'];
 
-// Fetch the total number of orders
-$order_query = "SELECT COUNT(*) AS total_orders FROM `order`";
+// Fetch the total number of orders for this admin
+$order_query = "SELECT COUNT(*) AS total_orders FROM orders WHERE admin_id = '$admin_id'";  // Corrected table name
 $order_result = mysqli_query($conn, $order_query);
 $order_data = mysqli_fetch_assoc($order_result);
 $total_orders = $order_data['total_orders'];
 
 // Fetch the total number of users
-$user_query = "SELECT COUNT(*) AS total_users FROM user_form";
+$user_query = "SELECT COUNT(*) AS total_users FROM users";  // Corrected table name
 $user_result = mysqli_query($conn, $user_query);
 $user_data = mysqli_fetch_assoc($user_result);
 $total_users = $user_data['total_users'];
 
-// Fetch recent activities (Example: last 5 products added)
-$recent_products_query = "SELECT name, price FROM products ORDER BY id DESC LIMIT 9";
+// Fetch recent activities (Example: last 5 products added by this admin)
+$recent_products_query = "SELECT id, name, price FROM products WHERE admin_id = '$admin_id' ORDER BY id DESC LIMIT 5"; // Include product id for future use
 $recent_products_result = mysqli_query($conn, $recent_products_query);
 $recent_products = mysqli_fetch_all($recent_products_result, MYSQLI_ASSOC);
 ?>
@@ -41,12 +49,11 @@ $recent_products = mysqli_fetch_all($recent_products_result, MYSQLI_ASSOC);
 </head>
 
 <body>
-    <?php include("navbar.php"); ?>
 
     <div class="admin-container">
         <!-- Dashboard Section -->
         <section class="dashboard">
-            <h1>Welcome Back, <?php echo $_SESSION['username']; ?>!</h1> <!-- Displaying dynamic admin username -->
+            <h1>Welcome Back, <?php echo $_SESSION['username']; ?>!</h1> <!-- Displaying the username from session -->
             <p>Manage your store seamlessly with the following options and updates.</p>
             <div class="stats">
                 <div class="stat">
@@ -72,7 +79,7 @@ $recent_products = mysqli_fetch_all($recent_products_result, MYSQLI_ASSOC);
             <ul>
                 <?php foreach ($recent_products as $product): ?>
                 <li>
-                    <i class="fas fa-box"></i> New Product "<?php echo $product['name']; ?>" added.<br>Nrs. <?php echo substr($product['price'], 0, 50); ?>
+                    <i class="fas fa-box"></i> New Product "<?php echo $product['name']; ?>" added.<br>Nrs. <?php echo number_format($product['price'], 2); ?> <!-- Formatted price -->
                 </li>
                 <?php endforeach; ?>
             </ul>

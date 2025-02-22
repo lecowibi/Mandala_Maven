@@ -22,7 +22,6 @@ session_start(); {
 <body>
       <!-- starting navbar  -->
       <nav>
-            <!-- logo of the project  -->
             <div class="logo">
                 <img src="img/logo.png" alt="Mandala Maven logo">
             </div>
@@ -49,6 +48,9 @@ session_start(); {
                     </a>
                     <a href="delivered_orders.php">
                         <li>Delivered</li><span class="design"></span>
+                    </a>
+                    <a href="approval.php">
+                        <li>Approval</li><span class="design"></span>
                     </a>
 
                 </ul>

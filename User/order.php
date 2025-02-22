@@ -132,16 +132,28 @@ if (isset($_GET['cancel'])) {
                         <td><?php echo htmlspecialchars($row['landmark']); ?></td>
                         <td class="order"><?php 
                             // Fetch and display the ordered products and quantities
-                            $order_items_query = mysqli_query($conn, "SELECT oi.quantity, p.name
+                            $order_items_query = mysqli_query($conn, "SELECT oi.quantity, p.name, p.visible
                                                 FROM order_items oi 
                                                 JOIN products p ON oi.product_id = p.id
                                                 WHERE oi.order_id = '" . $row['id'] . "'");
 
                             $ordered_products = [];
                             while ($item = mysqli_fetch_assoc($order_items_query)) {
-                                $ordered_products[] = $item['name'] . " (" . $item['quantity'] . ")";
+                                if ($item['visible'] == 0) {
+                                    // If product is no longer available (visible = 0)
+                                    $ordered_products[] = $item['name'] . " (No longer available)";
+                                } else {
+                                    // Else, display the ordered product and its quantity
+                                    $ordered_products[] = $item['name'];
+                                }
                             }
-                            echo implode('<br>', $ordered_products);
+
+                            // If no products found or all products are unavailable
+                            if (empty($ordered_products)) {
+                                echo "Product is no longer available";
+                            } else {
+                                echo implode('<br>', $ordered_products);
+                            }
                         ?></td>
                         <td>Nrs. <?php echo htmlspecialchars($row['total_price']); ?></td>
                         <td>

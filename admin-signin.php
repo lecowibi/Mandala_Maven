@@ -22,6 +22,7 @@ if (isset($_POST["submit"])) {
         } elseif (password_verify($password, $row['password'])) {
             // Set session for logged-in user
             $_SESSION['username'] = $row['username'];
+            $_SESSION['admin_id'] = $row['admin_id'];
 
             // Redirect to the user page
             header('Location: admin/admin-homepage.php');

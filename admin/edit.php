@@ -1,17 +1,27 @@
 <?php
 include('../database.php');
+
+include('navbar.php');
+// Check if the admin is logged in
+$admin_id = isset($_SESSION['admin_id']) ? $_SESSION['admin_id'] : null;
+if (!$admin_id) {
+    header('Location: login.php');
+    exit();
+}
+
 if (isset($_GET['delete'])) { 
     $delete_id = $_GET['delete'];
 
     // Execute the delete query
-    $delete_query = mysqli_query($conn, "DELETE FROM products WHERE id='$delete_id'");
-if($delete_query){
-$message[]="Product Deleted Successfully";
+    $delete_query = mysqli_query($conn, "DELETE FROM products WHERE id='$delete_id' AND admin_id = '$admin_id'");
+    
+    if($delete_query){
+        $message[] = "Product Deleted Successfully";
+    } else {
+        $message[] = "Failed to Delete Product";
+    }
 }
-else{
-$message[]="Failed to Delete Product";
-}
-}
+
 ?>
 
 <!DOCTYPE html>
@@ -23,47 +33,51 @@ $message[]="Failed to Delete Product";
     <link rel="stylesheet" href="admincss/style.css">
 </head>
 <body>
-    <?php
-    include('navbar.php');
+    <?php 
+    // Display message if available
+    if (isset($message)) {
+        foreach ($message as $msg) {
+            echo "<p>$msg</p>";
+        }
+    }
     ?>
-     <section class="display-product">
-            <table>
-                <thead>
-                    <th>product image</th>
-                    <th>product name</th>
-                    <th>product price</th>
-                    <th>action</th>
-                </thead>
-                <tbody>
-                    <?php
-                    $select_product = mysqli_query($conn, "SELECT * FROM products");
-                    if (mysqli_num_rows($select_product) > 0) {
-                        while ($row = mysqli_fetch_assoc($select_product)) {
-                    ?>
-                            <tr>
-                                <td><img src="uploaded_images/<?php echo $row['image']; ?>" height="90" alt=""></td>
-                                <td><?php echo $row['name']; ?></td>
-                                <td>Nrs.<?php echo $row['price']; ?></td>
-                                <td>
-                                    <a href="edit.php?delete=<?php echo $row['id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this?')">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </a>
 
-                                    <a href="editProduct.php?edit=<?php echo $row['id']; ?>" class="edit-btn">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
-
-                                </td>
-                            </tr>
-                    <?php
-                        }
-                    } else {
-                        echo "<p>No product added</p>";
+    <section class="display-product">
+        <table>
+            <thead>
+                <th>Product Image</th>
+                <th>Product Name</th>
+                <th>Product Price</th>
+                <th>Action</th>
+            </thead>
+            <tbody>
+                <?php
+                // Fetch products based on the logged-in admin
+                $select_product = mysqli_query($conn, "SELECT * FROM products WHERE admin_id = '$admin_id'");
+                if (mysqli_num_rows($select_product) > 0) {
+                    while ($row = mysqli_fetch_assoc($select_product)) {
+                ?>
+                    <tr>
+                        <td><img src="uploaded_images/<?php echo $row['image']; ?>" height="90" alt=""></td>
+                        <td><?php echo $row['name']; ?></td>
+                        <td>Nrs.<?php echo $row['price']; ?></td>
+                        <td>
+                            <a href="edit.php?delete=<?php echo $row['id']; ?>" class="delete-btn" onclick="return confirm('Are you sure you want to delete this?')">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                            <a href="editProduct.php?edit=<?php echo $row['id']; ?>" class="edit-btn">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                        </td>
+                    </tr>
+                <?php
                     }
-                    ?>
-                </tbody>
-            </table>
-        </section>
-
+                } else {
+                    echo "<tr><td colspan='4'>No products added</td></tr>";
+                }
+                ?>
+            </tbody>
+        </table>
+    </section>
 </body>
 </html>

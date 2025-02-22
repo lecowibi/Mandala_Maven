@@ -1,5 +1,7 @@
 <?php
 include('../database.php');
+ include("navbar.php");
+$admin_id = $_SESSION['admin_id']; // Replace this with your actual session variable
 
 if (isset($_POST['add_product'])) {
     $p_name = $_POST['p_name'];
@@ -13,8 +15,10 @@ if (isset($_POST['add_product'])) {
     if (strlen($p_description) > 255) {
         $message[] = "Description can't be more than 255 characters.";
     } else {
-        // Insert product data into the database
-        $insert = "INSERT INTO products(name, price, image, description) VALUES('$p_name', '$p_price', '$p_image','$p_description')";
+        // Insert product data into the database, including admin_id
+        $insert = "INSERT INTO products(name, price, image, description, admin_id) 
+                   VALUES('$p_name', '$p_price', '$p_image', '$p_description', '$admin_id')";
+
         $insert_query = mysqli_query($conn, $insert) or die('Query failed');
 
         if ($insert_query) {
@@ -39,7 +43,7 @@ if (isset($_POST['add_product'])) {
 </head>
 
 <body>
-    <?php include("navbar.php"); ?>
+    
     <div class="container">
         <section>
             <form action="" method="post" enctype="multipart/form-data">
