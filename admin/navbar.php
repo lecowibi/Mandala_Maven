@@ -49,9 +49,9 @@ session_start(); {
                     <a href="delivered_orders.php">
                         <li>Delivered</li><span class="design"></span>
                     </a>
-                    <a href="approval.php">
-                        <li>Approval</li><span class="design"></span>
-                    </a>
+                    
+                        
+                  
 
                 </ul>
             </div>
@@ -70,6 +70,7 @@ session_start(); {
                     </lord-icon>
                     <ul>
                         <li> <?php echo $_SESSION['username'] ?></li>
+                        <li><a href="approval.php">Approval  </a></li>
                         <li> <a href="logout.php">Log out</a></li>
                     </ul>
                 </div>

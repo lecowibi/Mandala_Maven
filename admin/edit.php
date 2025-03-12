@@ -1,7 +1,7 @@
 <?php
 include('../database.php');
-
 include('navbar.php');
+
 // Check if the admin is logged in
 $admin_id = isset($_SESSION['admin_id']) ? $_SESSION['admin_id'] : null;
 if (!$admin_id) {
@@ -12,16 +12,22 @@ if (!$admin_id) {
 if (isset($_GET['delete'])) { 
     $delete_id = $_GET['delete'];
 
-    // Execute the delete query
-    $delete_query = mysqli_query($conn, "DELETE FROM products WHERE id='$delete_id' AND admin_id = '$admin_id'");
+    // Check if the product is in an order
+    $check_order = mysqli_query($conn, "SELECT * FROM order_items WHERE product_id='$delete_id'");
     
-    if($delete_query){
-        $message[] = "Product Deleted Successfully";
+    if (mysqli_num_rows($check_order) > 0) {
+        $message[] = "Cannot delete product. It has been ordered.";
     } else {
-        $message[] = "Failed to Delete Product";
+        // Execute the delete query
+        $delete_query = mysqli_query($conn, "DELETE FROM products WHERE id='$delete_id' AND admin_id = '$admin_id'");
+        
+        if($delete_query){
+            $message[] = "Product Deleted Successfully";
+        } else {
+            $message[] = "Failed to Delete Product";
+        }
     }
 }
-
 ?>
 
 <!DOCTYPE html>

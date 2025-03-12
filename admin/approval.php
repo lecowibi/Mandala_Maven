@@ -10,14 +10,14 @@ if (!isset($_SESSION['username'])) {
 
 // Check if the pin is entered and validate it
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['admin_pin'])) {
-    // Fetch the stored pin from the database
-    $pin_query = "SELECT * FROM admin_security WHERE id = 1"; // Assuming there's only one pin in the database
-    $pin_result = mysqli_query($conn, $pin_query);
-    $pin_row = mysqli_fetch_assoc($pin_result);
+    $pin_query = "SELECT pin FROM admin_security WHERE id = 1";
+    $stmt = mysqli_prepare($conn, $pin_query);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $pin_row = mysqli_fetch_assoc($result);
 
-    // Verify the entered pin (no hashing, just plain text comparison)
     if ($_POST['admin_pin'] === $pin_row['pin']) {
-        $_SESSION['pin_authenticated'] = true; // Set session variable to indicate pin is authenticated
+        $_SESSION['pin_authenticated'] = true;
     } else {
         $error_message = "Incorrect pin. Please try again.";
     }
@@ -26,25 +26,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['admin_pin'])) {
 // Change pin logic
 if (isset($_POST['change_pin'])) {
     $new_pin = $_POST['new_pin'];
-
-    // Update the pin in the database
-    $update_query = "UPDATE admin_security SET pin = '$new_pin' WHERE id = 1";
-    mysqli_query($conn, $update_query);
+    $update_query = "UPDATE admin_security SET pin = ? WHERE id = 1";
+    $stmt = mysqli_prepare($conn, $update_query);
+    mysqli_stmt_bind_param($stmt, "s", $new_pin);
+    mysqli_stmt_execute($stmt);
     $success_message = "Pin updated successfully!";
+}
+
+// Approve user logic
+if (isset($_GET['approve_id'])) {
+    $approve_id = $_GET['approve_id'];
+    $approve_query = "UPDATE admin SET approved = 1 WHERE admin_id = ?";
+    $stmt = mysqli_prepare($conn, $approve_query);
+    mysqli_stmt_bind_param($stmt, "i", $approve_id);
+    mysqli_stmt_execute($stmt);
+    header("Location: approval.php"); // Refresh page to update changes
+    exit();
 }
 
 // Fetch unapproved users
 $fetch_users = "SELECT * FROM admin WHERE approved = 0";
 $users = mysqli_query($conn, $fetch_users);
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Approval</title>
-    <link rel="stylesheet" href="admin-approval.css">
 </head>
 <style>
     body {
@@ -174,7 +183,6 @@ $users = mysqli_query($conn, $fetch_users);
     }
 </style>
 <body>
-
     <?php if (!isset($_SESSION['pin_authenticated'])): ?>
     <div class="container">
         <h2>Please Enter Admin Pin</h2>
@@ -185,9 +193,8 @@ $users = mysqli_query($conn, $fetch_users);
         </form>
     </div>
     <?php else: ?>
-
     <div class="container">
-        <h2>Pending User Approvals</h2>
+        <h2>Pending Admin Approvals</h2>
         <table>
             <tr>
                 <th>ID</th>
@@ -205,13 +212,9 @@ $users = mysqli_query($conn, $fetch_users);
             <?php } ?>
         </table>
     </div>
-
-    <!-- Button to show change pin form -->
     <div class="container">
         <button class="change-pin-btn" onclick="togglePinChangeForm()">Change Admin Pin</button>
     </div>
-
-    <!-- Form to change the pin -->
     <div class="container pin-change-form" id="pinChangeForm">
         <h2>Change Admin Pin</h2>
         <?php if (isset($success_message)) { echo "<p class='message'>$success_message</p>"; } ?>
@@ -221,16 +224,12 @@ $users = mysqli_query($conn, $fetch_users);
             <button type="submit" name="change_pin">Change Pin</button>
         </form>
     </div>
-
     <?php endif; ?>
-
     <script>
-        // Toggle the visibility of the pin change form
         function togglePinChangeForm() {
             var form = document.getElementById('pinChangeForm');
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
         }
     </script>
-
 </body>
 </html>
